@@ -56,3 +56,6 @@ build/
 
 #docs
 1-docs/
+
+.env.example
+ativar.bat
