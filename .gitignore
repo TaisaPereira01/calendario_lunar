@@ -1,0 +1,58 @@
+# ================================================
+# .gitignore
+# ================================================
+
+# Variaveis de ambiente (NUNCA versionar)
+.env
+
+# Ambiente virtual (fica em C:\venvs, nao no projeto)
+venv/
+.venv/
+env/
+
+# Banco de dados local
+#data/*.db
+#data/*.sqlite
+#data/*.sqlite3
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Pytest e cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Arquivos temporarios
+*.tmp
+*.bak
+*.swp
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Distribuicao Python
+dist/
+build/
+*.egg-info/
+
+#docs
+1-docs/
