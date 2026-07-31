@@ -18,10 +18,12 @@ diária de protocolos de alimentação, suplementação, exercícios e práticas
 organizados pela fase atual da Lua e pelo dia da semana. O sistema identifica a fase lunar
 de uma data e exibe o protocolo completo do dia, agrupado por período.
 
-Uso **pessoal, single-user, offline**. O Excel permanece como fonte de edição dos
-protocolos; o app é **somente leitura** — elimina a consulta manual à planilha no dia a
-dia. O banco (SQLite) é alimentado offline pelo pipeline **Excel → `import_excel.py` →
-SQLite**.
+Uso **pessoal, single-user**. O Excel permanece como fonte de edição dos protocolos;
+**sobre os protocolos, o app é somente leitura e offline** — elimina a consulta manual à
+planilha no dia a dia. O banco de protocolos (SQLite) é alimentado offline pelo pipeline
+**Excel → `import_excel.py` → SQLite**. A partir da Fase 5, o app também tem um **diário
+pessoal** que grava anotações do usuário em nuvem privada (Google Sheets) — um domínio
+separado dos protocolos, que não toca o SQLite nem o Excel (DEC-017/DEC-018).
 
 ---
 
@@ -86,7 +88,7 @@ Extraídas de `RULES.md` — somam-se às regras canônicas do framework, não a
 - Dias da semana: **Segunda = 1 … Domingo = 7** (`get_weekday_id = date.weekday() + 1`) (`RULES#5`).
 - Importação Excel → banco roda em **transação única**; itens repetidos são normalizados — um `item` reutilizado por vários `protocol_item` (`RULES#6`).
 - Os **10 tipos de item** têm ícone fixo; não crie tipo/ícone novo sem `DEC` correspondente (`RULES#7`).
-- A UI é **somente leitura** em runtime; toda escrita acontece offline nos scripts de `scripts/` (INV-002 / INV-004, ARCHITECTURE §2).
+- Sobre os **protocolos**, a UI é **somente leitura** em runtime; toda escrita de protocolo acontece offline nos scripts de `scripts/` (INV-002 / INV-004). O **diário** (Fase 5) grava anotações do usuário em nuvem privada, nunca em `protocolos.db` (DEC-017/DEC-018, `RULES §10`, ARCHITECTURE §2).
 - **SQL puro, sem ORM** — decisão deliberada (DEC-006 / ARCHITECTURE §8).
 - Ao usar `unsafe_allow_html` em `render_period_card`, **escape** o conteúdo do Excel antes de montar o HTML (ARCHITECTURE §7).
 

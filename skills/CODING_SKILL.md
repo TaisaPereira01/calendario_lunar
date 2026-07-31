@@ -26,9 +26,12 @@ seção aponta para o trecho canônico que a governa.
   registrada como risco). Ao mexer ali, **não pioreo acoplamento**: funções SQL
   (`get_phase`, `get_protocol_day`, `get_protocol_week`) ficam separadas das funções de
   render (`render_period_card`, `view_today`, `view_week`, `view_phase`).
-- **A UI é somente leitura em runtime** (INV-002 / INV-004). Nenhum código de `app/app.py`
-  pode escrever no banco. Toda escrita acontece **offline** nos scripts de `scripts/`
-  (`create_database.py`, `import_excel.py`, `generate_moon_calendar.py`).
+- **Sobre os protocolos, a UI é somente leitura em runtime** (INV-002 / INV-004): nenhum
+  código de `app/app.py` escreve em `protocolos.db`; toda escrita de protocolo acontece
+  **offline** nos scripts de `scripts/` (`create_database.py`, `import_excel.py`,
+  `generate_moon_calendar.py`). **Exceção do diário (Fase 5):** a view Diário grava
+  anotações do usuário em armazenamento próprio na nuvem (Google Sheets), **nunca** em
+  `protocolos.db` — domínio separado (DEC-017/DEC-018, `RULES §10`).
 - Persistência é **SQLite + SQL puro, sem ORM** (DEC-006). Não introduza ORM nem camada
   de abstração de banco.
 

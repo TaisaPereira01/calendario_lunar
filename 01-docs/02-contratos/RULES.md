@@ -1,6 +1,6 @@
 # RULES — Planner Lunar Integrativo
 
-**Versão:** 0.3
+**Versão:** 0.4
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Documento crítico** — alterações exigem atualização do bloco "Histórico do documento".
@@ -14,6 +14,7 @@
 | 0.1 | 2026-07-31 | Rascunho inicial (adoção Oya, Etapa 1.5). Regras extraídas do código em funcionamento. |
 | 0.2 | 2026-07-31 | §6 ganhou a exceção de linha entre parênteses = nota do item anterior (BUG-001). |
 | 0.3 | 2026-07-31 | §6 ganhou a exceção de condição "Se ..." final = nota (BUG-002); parsing extraído para `scripts/parsing.py` com testes. |
+| 0.4 | 2026-07-31 | Ciclo do diário (Fase 5): §2 escopa "somente leitura" aos protocolos; nova §10 com as regras do diário (uma anotação por data, upsert). Ver DEC-017/DEC-018. |
 
 ---
 
@@ -21,14 +22,14 @@
 
 Este documento define as regras de negócio do **Planner Lunar Integrativo** — a fonte oficial
 para cálculos, mapeamentos e validações. Regras extraídas do sistema em funcionamento
-(`app.py`, `import_excel.py`, `generate_moon_calendar.py`).
+(`app.py`, `import_excel.py`, `generate_moon_calendar.py`) e dos ciclos de evolução (login, diário).
 
 ## 2. Princípios
 
 - **Determinismo:** para uma mesma data e um mesmo banco, o protocolo exibido é sempre o mesmo.
-- **Reprodutibilidade:** o banco é regenerável a partir de `schema.sql` + `seed.sql` + Excel + calendário.
-- **Somente leitura:** a interface nunca altera dados (INV-002).
-- **Fonte única:** protocolos vêm do Excel; consulta vem do SQLite (INV-001, INV-004).
+- **Reprodutibilidade:** o banco de protocolos é regenerável a partir de `schema.sql` + `seed.sql` + Excel + calendário.
+- **Somente leitura (protocolos):** a interface nunca altera os dados de protocolo (INV-002). O diário escreve apenas anotações pessoais, em armazenamento próprio (§10).
+- **Fonte única (protocolos):** protocolos vêm do Excel; a consulta vem do SQLite (INV-001, INV-004). O diário é um domínio separado, com armazenamento próprio.
 
 ## 3. Definições
 
@@ -36,6 +37,7 @@ para cálculos, mapeamentos e validações. Regras extraídas do sistema em func
 - **Período:** faixa do dia (Rotina Matinal, Café da Manhã, …, Terapias) — 10 no total, com ordem fixa.
 - **Item:** uma atividade/insumo (alimento, suplemento, exercício, terapia, hábito…), classificada por tipo.
 - **Protocolo:** conjunto de itens de uma (fase × dia da semana × período).
+- **Anotação (diário):** um texto livre associado a uma **data**, criado pela usuária (não é protocolo).
 
 ## 4. Determinação da fase lunar
 
@@ -88,7 +90,16 @@ Dados de referência fixos (carregados por `seed.sql`):
 - Itens são agrupados por período, na ordem de `period.display_order`, e dentro do período por `display_order`.
 - Cada período é um card único (DEC-007); cada item mostra ícone, nome, valor (se houver) e nota (se houver).
 
-## 10. Fora deste documento
+## 10. Diário pessoal
+
+- **Uma anotação por data.** A chave é a **data**; gravar substitui a anotação daquela data (**upsert**), nunca cria uma segunda linha para a mesma data (AC-DIA-02).
+- **Texto livre.** A anotação é um único campo de texto, sem estrutura obrigatória.
+- **Armazenamento próprio, na nuvem.** As anotações vivem no Google Sheets (planilha privada da usuária), separadas do SQLite de protocolos — o diário **nunca** grava em `protocolos.db` (INV-004). Ver DEC-018.
+- **Acesso protegido.** Requer login (só a usuária autenticada lê/escreve); a credencial de acesso à planilha vive nos secrets, fora do git (RNF-004/RNF-005).
+- **Isolamento de falha.** Se o diário estiver indisponível (rede/credencial), a consulta de protocolo continua funcionando; a falha do diário exibe mensagem clara e não derruba o app (ARCH §6).
+- **Data sem anotação** exibe o campo vazio, pronto para escrever — não é erro.
+
+## 11. Fora deste documento
 
 - Esquema físico do banco → `DATABASE_SCHEMA.md`.
 - Decisões e seus racionais → `DECISIONS.md`.

@@ -1,13 +1,14 @@
 # DECISIONS — Planner Lunar Integrativo
 
-**Versão:** 2.1
+**Versão:** 2.2
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 
 > Decisões no formato canônico `DEC-NNN [FUNC|TECH|TECH→PM]` (`OYA_DOC_STANDARD.md §10`).
 > DEC-001…010 correspondem 1:1 às ADRs originais (v1.0), agora com tag de origem e a seção
 > "Alternativas consideradas". DEC-011…014 emergiram da adoção Oya (2026-07-31); DEC-015…016
-> do ciclo de evolução do login (Fase 5, 2026-07-31).
+> do ciclo de evolução do login (Fase 5, 2026-07-31); DEC-017…018 do ciclo do diário (Fase 5,
+> 2026-07-31) — DEC-017 é `[muda invariante]`.
 
 ---
 
@@ -42,7 +43,7 @@ Os protocolos são editados manualmente e a PM edita melhor em planilha do que e
 ## Alternativas consideradas
 
 - Editar direto no SQLite — descartado: exige conhecimento técnico.
-- Formulário de edição no app — descartado: fora do escopo (app é somente leitura).
+- Formulário de edição no app — descartado: fora do escopo (app é somente leitura **de protocolos**; o diário da Fase 5 escreve só anotações do usuário, não protocolos).
 
 ## Decisão
 
@@ -174,7 +175,9 @@ O Streamlit é usado apenas para consulta; toda edição ocorre no Excel.
 
 ## Consequências
 
-Fluxo simplificado; base dos invariantes INV-002 e INV-001.
+Fluxo simplificado; base dos invariantes INV-002 e INV-001. (Escopado a **protocolos** pela
+DEC-017: a partir da Fase 5 o app escreve o **diário** pela UI, em armazenamento próprio — a
+edição de *protocolo* segue só no Excel.)
 
 ---
 
@@ -374,3 +377,82 @@ cookie vivem em config/segredos **local** (`.streamlit/secrets.toml` ou config Y
 - +1 dependência (`streamlit-authenticator`) em `requirements.txt` — a adicionar na implementação (Fase 2).
 - A PM configura usuário/senha e a chave do cookie localmente; a senha em texto nunca é commitada
   nem vista pelo agente (RNF-004). Cookie é browser-local — sem rede, INV-003 preservado.
+
+---
+
+# DEC-017 [FUNC] [muda invariante] Diário pessoal de anotações diárias
+
+## Contexto
+
+Ciclo de evolução (Fase 5). A PM quer registrar anotações pessoais do dia dentro do app, usadas
+pelo celular. Um diário faz o app **escrever** dados criados pelo usuário e **persisti-los na
+nuvem** — duas coisas que a redação original de três invariantes proibia: INV-002 (app só leitura),
+INV-003 (offline, sem rede em runtime) e INV-004 (SQLite é o único armazenamento consultado).
+Formato decidido com a PM: **uma anotação de texto livre por data**.
+
+## Alternativas consideradas
+
+- **Não fazer o diário** (status quo) — descartado: a PM quer o recurso.
+- **Diário salvo em SQLite local** — descartado: no deploy Streamlit Cloud o disco é efêmero
+  (dados somem a cada restart/redeploy) e não há acesso multi-dispositivo; além disso, gravar no
+  `protocolos.db` misturaria dado do usuário com a fonte de protocolo (fere o espírito de INV-004).
+- **Diário como campos estruturados** (humor, sintomas, múltiplas anotações/dia) — adiado: fora do
+  escopo deste ciclo (PRD §9/§11); começa como texto livre por data.
+- **Manter os invariantes como estão e não abrir exceção** — descartado: seria incompatível com o
+  recurso pedido; a mudança precisa ser explícita e registrada, não silenciosa.
+
+## Decisão
+
+Adicionar um **diário pessoal**: para a data selecionada, a usuária escreve/edita/salva uma
+anotação de texto livre (RF-012), persistida em nuvem privada e recuperável em qualquer
+dispositivo (RF-013). Cria RF-012/RF-013, RNF-005 e AC-DIA-01/02 no PRD; **reescreve o RNF-002**
+(rede em runtime restrita ao diário). O mecanismo de armazenamento é a DEC-018.
+
+**Muda três invariantes** (`Constitution.md` reescrita, não deixa fóssil):
+
+- **INV-002** — passa a garantir só-leitura sobre **protocolos**; o diário escreve em armazenamento próprio.
+- **INV-003** — a **consulta de protocolo** segue local/offline; o diário pode usar nuvem, com rede em runtime restrita a ele.
+- **INV-004** — SQLite é o único armazenamento **de protocolos**; o diário usa armazenamento próprio.
+
+**INV-001 não muda** — o diário não é protocolo e não toca o Excel.
+
+## Consequências
+
+- O núcleo do app (consultar protocolo por fase da lua) permanece só-leitura, offline e só-SQLite.
+- O diário é um domínio novo e separado, com sua própria persistência (DEC-018) e seu próprio ponto de rede.
+- Afeta PRD §6/§7/§8/§9/§10/§11 e ARCHITECTURE §1/§2/§3/§4/§5/§6/§7/§8; as linhas INV-002/003/004 da `Constitution.md` foram reescritas.
+- Falha do diário (rede/credencial) não pode derrubar a consulta de protocolo — isolamento obrigatório (ARCH §6).
+
+---
+
+# DEC-018 [TECH] Google Sheets como armazenamento do diário
+
+## Contexto
+
+RF-013 exige que a anotação persista na nuvem e seja acessível pelo celular. O deploy roda no
+Streamlit Community Cloud, cujo disco é efêmero — armazenamento local não persiste. É preciso um
+armazenamento externo privado, gratuito e com setup viável para uma PM não-técnica (que já
+configurou secrets no ciclo do login).
+
+## Alternativas consideradas
+
+- **Banco na nuvem (Supabase/Neon Postgres)** — viável, mas cadastro e modelagem mais técnicos que o necessário para "uma anotação por data".
+- **Só armazenamento local (SQLite/arquivo)** — descartado: efêmero no Cloud, sem multi-dispositivo (ver DEC-017).
+- **Criptografia ponta-a-ponta do texto** — descartado neste ciclo: se a chave se perde, as anotações são irrecuperáveis; para um diário, recuperabilidade vale mais (PM ciente). A privacidade vem do login + planilha privada + credencial fora do git.
+
+## Decisão
+
+Usar **Google Sheets** (planilha privada da conta da usuária) como armazenamento do diário,
+acessado por **credencial de service account**. Uma linha por data (`data`, `anotacao`);
+gravar faz **upsert por data** (uma anotação por dia — AC-DIA-02). A credencial (JSON do service
+account) e o id da planilha vivem nos **secrets** (Streamlit Cloud e `.streamlit/secrets.toml`
+local), **nunca** no repositório (RNF-005). A biblioteca de acesso (ex.: `gspread` /
+`st-gsheets-connection`) é fixada na implementação (Fase 2).
+
+## Consequências
+
+- RF-013 atendido: anotações persistem e são lidas pelo celular (app do Google Sheets, inclusive).
+- +1 dependência de acesso ao Google Sheets em `requirements.txt` — a fixar na implementação (Fase 2).
+- A PM cria a planilha e o service account uma vez, guiada por passo a passo (como no login); a credencial nunca é commitada nem vista pelo agente.
+- Introduz o único ponto de rede em runtime (INV-003 reescrito na DEC-017); a fronteira é isolada num módulo próprio, testável por mock.
+- Camadas de segurança: login (quem entra) + secrets fora do git (a chave) + planilha privada da conta (onde o dado mora). Honestidade registrada: o provedor (Google) tecnicamente lê o conteúdo em repouso — privado para terceiros, não ponta-a-ponta.
