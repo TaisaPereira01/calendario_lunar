@@ -8,6 +8,10 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **Diário pessoal** (T-004): dependência `gspread` no `requirements.txt`; template de
+  credencial do Google Sheets em `.streamlit/secrets.toml.example` (seção `[diario]`) e
+  passo a passo no README (planilha privada + conta de serviço). Base do recurso de
+  anotações diárias (RF-012/RF-013, DEC-017/DEC-018). A configuração fica fora do git.
 - **Login de usuário único** (T-001/T-002/T-003): o app agora pede **usuário e senha** antes de
   mostrar qualquer protocolo, e **mantém a sessão** entre recarregamentos da página (cookie
   local). A senha é guardada em **hash**, configurada por você em `.streamlit/secrets.toml`

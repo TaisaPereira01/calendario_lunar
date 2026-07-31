@@ -8,3 +8,4 @@ pandas>=2.3.0
 openpyxl>=3.1.5
 skyfield>=1.54
 streamlit-authenticator>=0.4,<0.5  # login local usuário+senha (DEC-016)
+gspread>=6.0,<7.0  # diário: armazenamento das anotações no Google Sheets (DEC-018, RF-013)

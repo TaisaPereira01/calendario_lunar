@@ -186,6 +186,32 @@ um botão **Sair** na barra lateral.
 
 ---
 
+# Diário (configuração)
+
+O app tem um **diário**: uma anotação de texto livre por dia, salva numa planilha
+Google **privada sua** — para você acessar de qualquer lugar, inclusive o celular.
+Configure uma vez:
+
+1. **Crie uma planilha** no Google Sheets (em branco). Guarde o **ID** dela — na URL,
+   é o pedaço entre `/d/` e `/edit`.
+2. **Crie uma conta de serviço** no Google Cloud (uma vez):
+   - Acesse https://console.cloud.google.com e crie um projeto.
+   - Ative as APIs **Google Sheets API** e **Google Drive API**.
+   - Em *IAM & Admin → Service Accounts*, crie uma conta e gere uma **chave JSON**.
+3. **Compartilhe a planilha** com o `client_email` que aparece no JSON (permissão
+   *Editor*) — é assim que o app enxerga a sua planilha.
+4. **Preencha os segredos**: em `.streamlit/secrets.toml`, seção `[diario]`, cole o
+   `spreadsheet_id` e os campos da conta de serviço (`[diario.service_account]`). O
+   modelo está em `.streamlit/secrets.toml.example`.
+
+O `secrets.toml` **nunca** é versionado. No **Streamlit Community Cloud**, cole o mesmo
+conteúdo `[diario]` em _App settings → Secrets_.
+
+Sem essa configuração o app segue funcionando normalmente — só a aba **📓 Diário** avisa
+que precisa ser configurada.
+
+---
+
 # Publicação no Streamlit Community Cloud
 
 O projeto é compatível com o Streamlit Community Cloud.

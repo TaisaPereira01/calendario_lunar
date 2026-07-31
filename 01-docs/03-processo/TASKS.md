@@ -67,7 +67,7 @@
   seguindo o doc, sem commitar segredo (RNF-005).
 - **REQs:** RNF-005
 - **Depende:** —
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)
 
 ### T-005 — Módulo de acesso ao diário (`app/diario.py`)
 
