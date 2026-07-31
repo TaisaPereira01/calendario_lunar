@@ -29,6 +29,8 @@ Cria as 8 seções abaixo já numeradas com placeholders — QA preenche:
 
 **9. Validar** — mesmo script aplica a receita **R-VALIDATE-DOC** sobre `01-docs/03-processo/TESTING_STRATEGY.md` como gate formal.
 
+> **Testes negativos / resiliência — desenhe já, peso na Fase 4 (FIELD-2026-218).** Não é uma 9ª seção: é uma lente aplicada dentro das seções **3** (escopo por camada) e **8**. Cada camada cobre o **dado errado de propósito**, mas **só** como **invariante do avesso** (mapeia AC/RB/RNF), nunca "e se o dado fosse estranho". Dois não-negociáveis: **(1)** o teste cita o invariante-alvo virado do lado da falha (isolamento → domínio quebrado não derruba os sãos; vazio → resposta vazia, não erro; nunca-silencioso → degrada **logado**); **(2) alcançabilidade** — provar que o caso é possível antes de escrever (caso barrado por schema/tipo é imaginação, não teste). O negativo de **contrato** (input inválido → erro) é barato e sempre presente; o de valor na Fase 4 é o **fault-injection** (dado corrompido → degrada+loga) e o comportamento de UI. Detalhe canônico em [`QA_ENGINEER_SKILL.md`](../personas-source/QA_ENGINEER_SKILL.md) §"Uso na Etapa 1.6".
+
 ### Modo refresh (Fase 2+, FIELD-2026-031)
 
 Trigger: `TESTING_STRATEGY.md` já existe. Objetivo: revalidar a estratégia contra o portfólio atual do projeto (REQs adicionados desde a última edição + testes escritos + gaps observados no COVERAGE.md).
@@ -42,6 +44,7 @@ Trigger: `TESTING_STRATEGY.md` já existe. Objetivo: revalidar a estratégia con
 **2. Propor updates** — QA gera lista de **propostas de alteração** por seção (não reescreve tudo — só o que muda):
    - Se pirâmide real divergiu do alvo → propor ajuste ou justificar
    - Se apareceram categorias novas de teste (property-based, contract, snapshot) → propor absorção
+   - Se a Fase 4 exercitou fontes reais / dado corrompido e viu degradação não-graciosa → propor **testes negativos amarrados a invariante** (fault-injection), não caso-a-caso de dado ruim (FIELD-2026-218)
    - Se cobertura alvo virou irreal → escalar `[TECH→PM]`
    - Se REQs arquiteturais foram marcados com `[no-code]`/`[no-test]` → refletir na estratégia (esses REQs saem do denominador de cobertura)
 
