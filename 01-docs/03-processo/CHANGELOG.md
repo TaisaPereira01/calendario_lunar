@@ -8,6 +8,10 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **Diário — módulo de acesso** (T-005): `app/diario.py` encapsula ler/gravar a
+  anotação no Google Sheets com **upsert por data** (uma anotação por dia, AC-DIA-02);
+  fronteira de rede isolada e testável por mock (`tests/test_diario.py`, 8 casos). Não
+  toca o SQLite de protocolos (INV-004). RF-013.
 - **Diário pessoal** (T-004): dependência `gspread` no `requirements.txt`; template de
   credencial do Google Sheets em `.streamlit/secrets.toml.example` (seção `[diario]`) e
   passo a passo no README (planilha privada + conta de serviço). Base do recurso de

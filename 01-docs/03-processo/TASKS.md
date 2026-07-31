@@ -80,7 +80,7 @@
   sem anotação retorna vazio sem erro.
 - **REQs:** RF-013, RNF-005
 - **Depende:** T-004
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)
 
 ### T-006 — View "Diário" no app (`app/app.py`)
 
