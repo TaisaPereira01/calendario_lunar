@@ -15,4 +15,6 @@ semântico quando o produto ganhar releases.
 - —
 
 ### Corrigido
-- —
+- **BUG-001:** "(Sempre com alguma gordura)" aparecia como item separado na lista de
+  suplementos; agora é exibido como nota da "Vitamina D3" (linha entre parênteses no Excel
+  vira observação do item anterior). Banco reimportado (652 → 633 protocolos).

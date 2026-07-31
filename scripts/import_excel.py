@@ -361,11 +361,21 @@ def get_or_create_item(
 # CELL PARSER
 # =============================================================================
 
+# Uma linha inteira entre parênteses é um qualificador do item anterior,
+# não um item próprio — ex.: "(Sempre com alguma gordura)" pertence à
+# Vitamina D3 que vem antes. Vira "notes" do item anterior. Ver BUG-001.
+
+PAREN_NOTE = re.compile(r"^\((.+)\)$")
+
+
 def parse_cell(value, item_type):
     """
     Converte uma célula em uma lista de itens.
 
     Cada linha não vazia da célula gera um item.
+
+    Exceção: uma linha totalmente entre parênteses não é um item, e sim
+    uma nota (qualificador) do item imediatamente anterior. Ver BUG-001.
 
     Exemplo:
 
@@ -385,6 +395,26 @@ def parse_cell(value, item_type):
     items = []
 
     for line in split_lines(value):
+
+        note = PAREN_NOTE.match(line)
+
+        if note and items:
+
+            inner = note.group(1).strip()
+
+            previous = items[-1]
+
+            previous["notes"] = (
+
+                f'{previous["notes"]} {inner}'.strip()
+
+                if previous["notes"]
+
+                else inner
+
+            )
+
+            continue
 
         items.append({
 
