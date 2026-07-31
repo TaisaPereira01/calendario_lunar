@@ -6,7 +6,7 @@
 
 > Decisões no formato canônico `DEC-NNN [FUNC|TECH|TECH→PM]` (`OYA_DOC_STANDARD.md §10`).
 > DEC-001…010 correspondem 1:1 às ADRs originais (v1.0), agora com tag de origem e a seção
-> "Alternativas consideradas". DEC-011…013 emergiram da adoção Oya (2026-07-31).
+> "Alternativas consideradas". DEC-011…014 emergiram da adoção Oya (2026-07-31).
 
 ---
 
@@ -260,8 +260,10 @@ como evoluções futuras (PRD §11), a serem tratadas na Fase 5.
 
 ## Consequências
 
-Escopo atual permanece focado no que já funciona. O login, quando feito, tocará o INV-003 e
-exigirá DEC própria com nota `[muda invariante]`.
+Escopo atual permanece focado no que já funciona. O login, quando implementado, é adjacente
+ao INV-003 (usuário único / local / offline) mas não o viola por si só; ainda assim exigirá
+uma DEC própria que confirme explicitamente esse ponto (ver nota de coerência em
+`Constitution.md` §3).
 
 ---
 

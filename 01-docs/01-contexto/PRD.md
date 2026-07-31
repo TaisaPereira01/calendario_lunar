@@ -1,8 +1,10 @@
 # PRD — Planner Lunar Integrativo
 
 **Versão:** 2.0
-**Status:** Em refinamento (Etapa 1.1 — adoção Oya)
-**Perfil pretendido:** Oya Lite
+**Última atualização:** 2026-07-31
+**Framework:** Oya Agentic Framework v3.5+
+**Status:** Aprovado
+**Perfil:** Oya Lite
 
 > Requisitos derivados do sistema em funcionamento (Fase 0, Cenário C) e confirmados
 > com a PM na Etapa 1.1. IDs seguem `OYA_DOC_STANDARD.md §5`.

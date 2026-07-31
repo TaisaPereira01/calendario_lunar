@@ -1,9 +1,10 @@
 # ================================================
-# .gitignore
+# .gitignore - Oya (canonico, scaffold `gitignore`)
 # ================================================
 
 # Variaveis de ambiente (NUNCA versionar)
 .env
+.env.*
 
 # Ambiente virtual (fica em C:\venvs, nao no projeto)
 venv/
@@ -11,9 +12,23 @@ venv/
 env/
 
 # Banco de dados local
+# NOTA (projeto): mantidas COMENTADAS por escolha deliberada do projeto —
+# `database/protocolos.db` e outros .db sao versionados de proposito (DB e
+# regeneravel de schema.sql+seed.sql, mas o projeto opta por versiona-lo).
 #data/*.db
 #data/*.sqlite
 #data/*.sqlite3
+
+# Reports do validate (gerados por --report / Passo 0 do review; regeneram) - FIELD-183
+01-docs/03-processo/VALIDATE_REPORT.md
+01-docs/03-processo/VALIDATE_CODE_REPORT.md
+
+# ---------------------------------------------------------------
+# VERSIONADOS de proposito - NAO ignorar (FIELD-122 / FIELD-208):
+#   01-docs/03-processo/radar-snapshots/   (snapshots JSON do radar)
+#   RADAR.md                               (retrato de saude do projeto)
+# (rtm-exports/ e events.jsonl nao se aplicam - projeto e Lite, sem RTM)
+# ---------------------------------------------------------------
 
 # Cache Python
 __pycache__/
@@ -25,6 +40,10 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# E2E browser (Playwright) - artefatos transitorios
+tests/oya-f2-e2e/screenshots/
+tests/oya-f2-e2e/downloads_tmp/
 
 # IDEs
 .vscode/
@@ -41,7 +60,7 @@ desktop.ini
 *.log
 logs/
 
-# Arquivos temporarios
+# Temporarios
 *.tmp
 *.bak
 *.swp
@@ -54,8 +73,9 @@ dist/
 build/
 *.egg-info/
 
-#docs
-1-docs/
-
+# ================================================
+# Especifico do projeto (preservado da 1.4 — nao perder)
+# ================================================
 .env.example
 ativar.bat
+1-docs/

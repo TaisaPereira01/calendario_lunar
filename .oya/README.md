@@ -1,0 +1,3 @@
+# Pasta `.oya/` — não apagar
+
+Esta pasta guarda a memória operacional do agente no projeto **Planner Lunar Integrativo**. O subdiretório `agent-runs/` é versionado no git e funciona como **audit log**: cada slash command da Fase 2+ (por exemplo `/oya-f2-implement`, `/oya-bug-fix`) gera aqui um script Python `<verbo>_<escopo>_<timestamp>.py` que registra, de forma reproduzível e rastreável, exatamente o que foi executado naquela invocação. Como o perfil deste projeto é **Oya Lite** (sem RTM), **não há** `rtm.db` nesta pasta — os bugs vivem em `01-docs/BUGS.md`. Não remova esta pasta nem seu conteúdo: apagá-la destrói o histórico de execução do agente.
