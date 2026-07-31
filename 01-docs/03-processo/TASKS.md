@@ -153,4 +153,4 @@
   protocolo se o checklist estiver indisponível (isolamento).
 - **REQs:** RF-015
 - **Depende:** T-009
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)

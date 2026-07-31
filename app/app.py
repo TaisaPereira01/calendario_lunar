@@ -18,6 +18,7 @@ import streamlit_authenticator as stauth
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import diario  # noqa: E402  — módulo local (app/diario.py); import após ajustar sys.path
+import checklist  # noqa: E402  — módulo local (app/checklist.py); estado "concluído"
 
 
 # =============================================================================
@@ -675,12 +676,49 @@ def render_footer():
 # VIEWS
 # =============================================================================
 
+def _checklist_item(selected_date, period_name, item_name, label, done_set):
+    """
+    Renderiza um item do dia como caixinha de concluído e persiste a marcação.
+    `done_set` = conjunto de (período, item) já concluídos na data.
+    """
+
+    key = f"chk_{selected_date.isoformat()}_{period_name}_{item_name}"
+
+    stored = (period_name, item_name) in done_set
+
+    if key not in st.session_state:
+
+        st.session_state[key] = stored
+
+    checked = st.checkbox(label, key=key)
+
+    if checked != stored:
+
+        erro = checklist.set_done_safe(
+            st.secrets,
+            selected_date,
+            period_name,
+            item_name,
+            checked,
+        )
+
+        if erro is not None:
+
+            st.session_state[key] = stored  # reverte a marcação visual
+
+            st.warning("Não consegui salvar a marcação agora. Tente de novo.")
+
+
+# =============================================================================
+
 def view_today(
     phase,
     selected_date,
 ):
     """
-    Exibe o protocolo do dia selecionado.
+    Protocolo do dia com checklist (RF-015): cada item ganha uma caixinha de
+    concluído. Isolamento (RF-016 / ARCH §6): se o checklist estiver indisponível,
+    o protocolo continua listado — só a marcação fica indisponível, com aviso.
     """
 
     rows = get_protocol_day(
@@ -691,7 +729,55 @@ def view_today(
 
     )
 
-    render_day(rows)
+    if not rows:
+
+        st.info("Nenhum protocolo encontrado.")
+
+        return
+
+    done_set, cl_erro = checklist.load_done_safe(st.secrets, selected_date)
+
+    if cl_erro is not None:
+
+        st.warning("O checklist está indisponível agora (mostrando só o protocolo).")
+
+        st.caption(f"Detalhe técnico: {cl_erro}")
+
+    grouped = group_by_period(rows)
+
+    for period_name, items in grouped.items():
+
+        icon = PERIOD_ICONS.get(period_name, "📌")
+
+        st.markdown(f"#### {icon} {period_name}")
+
+        for row in items:
+
+            label = f"{row['icon']} {row['item_name']}"
+
+            if row["value"]:
+
+                label += f" ({row['value']})"
+
+            if done_set is None:
+
+                st.markdown(f"- {label}")
+
+            else:
+
+                _checklist_item(
+                    selected_date,
+                    period_name,
+                    row["item_name"],
+                    label,
+                    done_set,
+                )
+
+            if row["notes"]:
+
+                st.caption(row["notes"])
+
+        st.write("")
 
 
 # =============================================================================

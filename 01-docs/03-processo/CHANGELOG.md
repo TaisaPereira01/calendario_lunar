@@ -8,6 +8,10 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **Checklist — caixinhas na aba Hoje** (T-010): cada item do protocolo do dia ganha uma
+  caixinha; marcar/desmarcar salva por data e reaparece ao reabrir a data. Se o Google Sheets
+  estiver indisponível, o protocolo continua listado com um aviso — não derruba o app (provado
+  por E2E via AppTest). RF-015, AC-CHECK-01.
 - **Checklist — armazenamento** (T-009): `app/checklist.py` grava o estado "concluído" por data
   no Google Sheets (aba `concluidos`, **mesma credencial do diário** — nada novo pra configurar),
   com upsert por `(data, período, item)`. Acesso ao Sheets refatorado como ponto único compartilhado
