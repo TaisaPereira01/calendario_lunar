@@ -85,3 +85,47 @@ def test_open_worksheet_sem_secao_diario_levanta():
 def test_open_worksheet_config_incompleta_levanta():
     with pytest.raises(diario.DiarioError):
         diario.open_worksheet({"diario": {"worksheet": "x"}})  # falta id/credencial
+
+
+# --- Isolamento de falha (T-007): os wrappers "safe" nunca deixam exceção subir ---
+
+def test_read_note_safe_falha_devolve_mensagem():
+    """T-007: config quebrada vira (None, mensagem), nunca exceção."""
+    texto, erro = diario.read_note_safe({}, datetime.date(2026, 7, 31))
+    assert texto is None
+    assert erro  # mensagem não-vazia
+
+
+def test_write_note_safe_falha_devolve_mensagem():
+    erro = diario.write_note_safe({}, datetime.date(2026, 7, 31), "x")
+    assert erro  # mensagem não-vazia
+
+
+def test_read_note_safe_sucesso(monkeypatch):
+    ws = FakeWorksheet([["data", "anotacao"], ["2026-07-31", "oi"]])
+    monkeypatch.setattr(diario, "open_worksheet", lambda secrets: ws)
+    texto, erro = diario.read_note_safe({"diario": {}}, datetime.date(2026, 7, 31))
+    assert erro is None
+    assert texto == "oi"
+
+
+def test_write_note_safe_sucesso_upsert(monkeypatch):
+    ws = FakeWorksheet([["data", "anotacao"]])
+    monkeypatch.setattr(diario, "open_worksheet", lambda secrets: ws)
+    d = datetime.date(2026, 7, 31)
+    assert diario.write_note_safe({"diario": {}}, d, "v1") is None
+    assert diario.write_note_safe({"diario": {}}, d, "v2") is None
+    assert diario.load_note(ws, d) == "v2"
+    assert len(ws.appended) == 1  # upsert: só o 1º anexou
+
+
+def test_diario_nao_acopla_protocolo():
+    """T-007 (estrutural): o diário não importa SQLite nem o app — domínio
+    separado (INV-004). Uma falha do diário não pode alcançar a consulta de
+    protocolo porque não há caminho de código entre eles."""
+    import inspect
+
+    src = inspect.getsource(diario)
+    assert "sqlite3" not in src
+    assert "protocolos.db" not in src
+    assert "import app" not in src

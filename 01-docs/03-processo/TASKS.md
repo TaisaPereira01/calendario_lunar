@@ -92,7 +92,7 @@
 - **Aceite:** AC-DIA-01 (salvar uma anotação numa data e reabrir a data mostra o texto salvo).
 - **REQs:** RF-012
 - **Depende:** T-005
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)
 
 ### T-007 — Isolamento de falha do diário (`app/app.py`, `app/diario.py`)
 
@@ -105,4 +105,4 @@
   renderiza; o diário mostra mensagem clara em vez de quebrar o app.
 - **REQs:** RF-012, RF-013
 - **Depende:** T-006
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)

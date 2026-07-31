@@ -101,3 +101,34 @@ def open_worksheet(secrets):
             return worksheet
     except Exception as exc:
         raise DiarioError(f"Falha ao acessar o Google Sheets do diário: {exc}") from exc
+
+
+# -----------------------------------------------------------------------------
+# Isolamento de falha (T-007) — nenhuma exceção sobe destes wrappers. A UI os usa
+# para que uma falha do diário (rede/credencial/config) vire mensagem, NUNCA algo
+# que derrube o app ou a consulta de protocolo (RF-012/RF-013, ARCHITECTURE §6).
+# -----------------------------------------------------------------------------
+
+def read_note_safe(secrets, data):
+    """Lê a anotação de ``data`` com isolamento de falha.
+
+    Retorna ``(texto, None)`` em sucesso e ``(None, mensagem)`` em qualquer falha.
+    """
+    try:
+        worksheet = open_worksheet(secrets)
+        return load_note(worksheet, data), None
+    except Exception as exc:
+        return None, str(exc)
+
+
+def write_note_safe(secrets, data, texto):
+    """Grava a anotação de ``data`` com isolamento de falha.
+
+    Retorna ``None`` em sucesso e a ``mensagem`` de erro em qualquer falha.
+    """
+    try:
+        worksheet = open_worksheet(secrets)
+        save_note(worksheet, data, texto)
+        return None
+    except Exception as exc:
+        return str(exc)

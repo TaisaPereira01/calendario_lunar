@@ -8,9 +8,16 @@ Aplicação Streamlit
 from pathlib import Path
 from datetime import date
 import sqlite3
+import sys
 
 import streamlit as st
 import streamlit_authenticator as stauth
+
+# Garante que app/ esteja no sys.path para importar o módulo local `diario` —
+# tanto sob `streamlit run app/app.py` quanto sob testes, em qualquer CWD.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import diario  # noqa: E402  — módulo local (app/diario.py); import após ajustar sys.path
 
 
 # =============================================================================
@@ -124,6 +131,8 @@ VIEW_TODAY = "🏠 Hoje"
 VIEW_WEEK = "📅 Semana"
 
 VIEW_PHASE = "🌙 Fase Lunar"
+
+VIEW_DIARY = "📓 Diário"
 
 
 # =============================================================================
@@ -483,6 +492,7 @@ def render_sidebar():
             VIEW_TODAY,
             VIEW_WEEK,
             VIEW_PHASE,
+            VIEW_DIARY,
         ),
     )
 
@@ -756,6 +766,61 @@ def view_phase(
 
 
 # =============================================================================
+
+def view_diario(selected_date):
+    """
+    View Diário: escreve/edita a anotação de texto livre da data (RF-012).
+
+    Isolada dos protocolos: uma falha do diário (rede/credencial/config) vira
+    mensagem clara e NÃO derruba o app — os wrappers read_note_safe/
+    write_note_safe nunca deixam exceção subir (T-007, ARCHITECTURE §6).
+    """
+
+    st.title("📓 Diário")
+
+    st.caption(format_date(selected_date))
+
+    atual, erro = diario.read_note_safe(st.secrets, selected_date)
+
+    if erro is not None:
+
+        st.error(
+            "Não consegui acessar o diário agora. Verifique a configuração do "
+            "Google Sheets (seção [diario] dos secrets — veja o README)."
+        )
+
+        st.caption(f"Detalhe técnico: {erro}")
+
+        return
+
+    texto = st.text_area(
+        "Anotação do dia",
+        value=atual,
+        height=320,
+        key=f"diario_{selected_date.isoformat()}",
+        placeholder="Escreva aqui suas anotações do dia...",
+    )
+
+    if st.button("💾 Salvar", type="primary"):
+
+        erro_save = diario.write_note_safe(
+            st.secrets,
+            selected_date,
+            texto,
+        )
+
+        if erro_save is None:
+
+            st.success("Anotação salva.")
+
+        else:
+
+            st.error("Não consegui salvar agora. Tente de novo em instantes.")
+
+            st.caption(f"Detalhe técnico: {erro_save}")
+
+
+# =============================================================================
 # DISPATCHER
 # =============================================================================
 
@@ -864,6 +929,16 @@ def main():
         "Sair",
         location="sidebar",
     )
+
+    # Diário é domínio próprio (não precisa de fase lunar): funciona em qualquer
+    # data, inclusive fora do calendário carregado.
+    if view == VIEW_DIARY:
+
+        view_diario(selected_date)
+
+        render_footer()
+
+        return
 
     phase = get_phase(
 

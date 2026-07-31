@@ -8,6 +8,12 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **Diário — tela e uso** (T-006/T-007): nova aba **📓 Diário** no app — para a data
+  escolhida, carrega a anotação, mostra um campo de texto e um botão salvar (upsert).
+  Funciona em qualquer data (não depende da fase lunar) e fica atrás do login. **Isolamento
+  de falha:** se o Google Sheets estiver indisponível (rede/credencial/config), o diário
+  mostra uma mensagem clara e **não derruba** o app nem a consulta de protocolo — o diário é
+  domínio separado, sem caminho de código até o SQLite (INV-004). RF-012/RF-013, AC-DIA-01.
 - **Diário — módulo de acesso** (T-005): `app/diario.py` encapsula ler/gravar a
   anotação no Google Sheets com **upsert por data** (uma anotação por dia, AC-DIA-02);
   fronteira de rede isolada e testável por mock (`tests/test_diario.py`, 8 casos). Não
