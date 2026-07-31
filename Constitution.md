@@ -1,6 +1,6 @@
 # Constitution — Planner Lunar Integrativo
 
-**Versão:** 0.1
+**Versão:** 0.2
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Documento crítico** — alterações exigem atualização do bloco "Histórico do documento".
@@ -12,6 +12,7 @@
 | Versão | Data | Mudança |
 |---|---|---|
 | 0.1 | 2026-07-31 | Rascunho inicial (adoção Oya, Etapa 1.1). 4 invariantes elicitados com a PM, derivados das ADRs. |
+| 0.2 | 2026-07-31 | Ciclo do login (Fase 5): nota de coerência do INV-003 passa a apontar para DEC-015/016. A tabela de invariantes **não** mudou (login preserva o INV-003). |
 
 ---
 
@@ -45,7 +46,7 @@ Nunca edite invariante em silêncio. Nunca renumere invariante existente — ID 
 se depreca, DEC registra a superseção e a linha da tabela é reescrita para o estado novo
 (não vira fóssil marcado).
 
-> **Nota de coerência:** a evolução futura "login simples de usuário único" (PRD §11) toca
-> o INV-003. Não é conflito — INV-003 fixa *single-user, local, offline*, e um login local
-> não viola nenhum desses. Mas por tocar um invariante, quando for implementado exigirá uma
-> DEC explícita.
+> **Nota de coerência:** o login de usuário único (ciclo Fase 5, RF-010/RF-011) toca o INV-003,
+> mas **não o viola** — INV-003 fixa *single-user, local, offline*, e um login local mantém os
+> três. Registrado em [DEC-015](01-docs/01-contexto/DECISIONS.md) (que confirma a preservação do
+> INV-003) e [DEC-016](01-docs/01-contexto/DECISIONS.md). A linha INV-003 **não** muda.

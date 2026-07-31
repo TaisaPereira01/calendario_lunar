@@ -1,6 +1,6 @@
 # ARCHITECTURE — Planner Lunar Integrativo
 
-**Versão:** 2.0
+**Versão:** 2.1
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Documento crítico** — alterações exigem atualização do bloco "Histórico do documento".
@@ -13,6 +13,7 @@
 |---|---|---|
 | 1.0 | 2026-06 | Arquitetura inicial (descrevia pipeline JSON). |
 | 2.0 | 2026-07-31 | Reconciliada com o código real na adoção Oya (Etapa 1.2): pipeline agora é Excel→SQLite direto (DEC-003), app é `app.py`, views são `vw_protocol`/`vw_calendar`. 8 seções canônicas. |
+| 2.1 | 2026-07-31 | Ciclo de evolução (Fase 5): camada de autenticação (login gate local via `streamlit-authenticator`) antes da apresentação. Ver DEC-015/DEC-016. |
 
 ---
 
@@ -25,6 +26,7 @@
 | Persistência | SQLite (`sqlite3`) | Zero-config, portável, single-user (DEC-001). SQL puro, sem ORM. |
 | Ingestão | openpyxl ≥ 3.1 | Lê o Excel (fonte de verdade) na etapa de ETL. |
 | Astronomia | skyfield ≥ 1.54 | Calcula as fases lunares por efemérides (`de421.bsp`), sem depender de API externa. |
+| Autenticação | streamlit-authenticator | Login local usuário+senha (hash) com cookie de sessão; sem servidor de auth nem identidade externa — mantém o modelo local/offline (DEC-016). |
 
 > `pandas` está em `requirements.txt` mas **não é usado** em `app.py`. A remover ou justificar na próxima revisão de dependências (ver §7).
 
@@ -51,6 +53,12 @@
 Fronteira-chave: a UI **só lê**; toda escrita acontece offline, pelos scripts. Coerente com
 os invariantes INV-002 (app read-only) e INV-004 (SQLite é a única fonte de consulta).
 
+**Autenticação (Fase 5):** acima da apresentação há um *login gate* local
+(`streamlit-authenticator`). É a primeira coisa que `main()` executa; sem sessão válida, nada
+do protocolo é renderizado. Valida usuário+senha (hash em config local) e mantém a sessão por
+cookie no navegador. É local e offline — nenhum servidor de auth, nenhuma identidade externa —
+preservando o INV-003 (single-user / local / offline). Ver DEC-015/DEC-016.
+
 > **Limitação conhecida:** apresentação e acesso a dados **coabitam** em `app.py` (SQL e UI
 > no mesmo arquivo). Aceitável para o porte atual; registrado como risco R5 no inventário.
 
@@ -60,7 +68,8 @@ os invariantes INV-002 (app read-only) e INV-004 (SQLite é a única fonte de co
 
 ```text
 app.py:main()
-   → render_sidebar()      (escolhe data + view)
+   → login_gate()          (streamlit-authenticator; barra o acesso se não autenticado)
+   → render_sidebar()      (escolhe data + view; inclui botão de logout)
    → get_phase(data)       (SQL em vw_calendar)
    → render_header(fase)
    → show_view()           → view_today / view_week / view_phase
@@ -90,6 +99,7 @@ moon_calendar.json ─────────────────┘       
 
 - **Nenhuma em runtime.** A UI não faz chamadas de rede (INV-003).
 - A única dependência "externa" é o arquivo de efemérides `de421.bsp`, usado **offline** por `generate_moon_calendar.py`. O skyfield pode baixá-lo sob demanda; hoje ele está versionado no repositório (ver risco R6).
+- O login (`streamlit-authenticator`) **não** é integração externa: valida contra config local e grava um cookie no navegador — nenhuma chamada de rede, nenhum provedor de identidade.
 
 ## 6. Estratégia de erros
 
@@ -106,8 +116,10 @@ moon_calendar.json ─────────────────┘       
 
 ## 8. Non-goals arquiteturais
 
-- **Não** é multiusuário nem multi-tenant (INV-003).
+- **Não** é multiusuário nem multi-tenant (INV-003) — o login é de **um** usuário.
+- **Não** usa identidade externa, OAuth ou servidor de autenticação — login é local (DEC-016).
+- **Não** oferece cadastro, gestão de usuários nem recuperação de senha (reconfigura no arquivo local).
 - **Não** expõe API pública nem serviço de rede.
 - **Não** permite edição de protocolos pela interface — edição é só no Excel (INV-001, INV-002).
 - **Não** usa ORM nem camada de abstração de banco — SQL puro é decisão deliberada (DEC-006).
-- **Não** persiste estado de usuário (sem histórico/sessão) na versão atual.
+- **Não** mantém histórico de uso; a única sessão persistida é a de login (cookie local), sem perfil de usuário.

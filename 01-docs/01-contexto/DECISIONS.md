@@ -1,12 +1,13 @@
 # DECISIONS — Planner Lunar Integrativo
 
-**Versão:** 2.0
+**Versão:** 2.1
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 
 > Decisões no formato canônico `DEC-NNN [FUNC|TECH|TECH→PM]` (`OYA_DOC_STANDARD.md §10`).
 > DEC-001…010 correspondem 1:1 às ADRs originais (v1.0), agora com tag de origem e a seção
-> "Alternativas consideradas". DEC-011…014 emergiram da adoção Oya (2026-07-31).
+> "Alternativas consideradas". DEC-011…014 emergiram da adoção Oya (2026-07-31); DEC-015…016
+> do ciclo de evolução do login (Fase 5, 2026-07-31).
 
 ---
 
@@ -315,3 +316,61 @@ Adotar **Oya Lite**. Docs canônicos + `BUGS.md` + slash commands, sem `rtm.db`.
 - Reversível: promover Lite → Completo depois é trivial (ver `docs/how-to/promover-lite-para-completo.md`);
   o inverso não. O default do framework favorece Lite justamente por isso.
 - Recomendação registrada pelo Tech Lead; decisão aprovada pela PM em 2026-07-31.
+
+---
+
+# DEC-015 [FUNC] Login de usuário único
+
+## Contexto
+
+Ciclo de evolução (Fase 5). O login estava em PRD §11 (evolução futura) e o RNF-001 declarava
+"sem autenticação". A PM decidiu proteger o acesso ao app com login de usuário único. A mudança
+**toca** o INV-003 (`Constitution.md`) — que fixa *usuário único / local / offline* — mas não o
+viola: um login local mantém os três.
+
+## Alternativas consideradas
+
+- **Manter sem login** (status quo) — descartado: a PM quer proteção básica de acesso.
+- **Login multiusuário / em nuvem** — descartado: violaria o INV-003 e o escopo pessoal.
+
+## Decisão
+
+Adicionar **login local de usuário único** (usuário + senha). Cria RF-010, RF-011, RNF-004 e
+AC-AUTH-01/02 no PRD; **reescreve o RNF-001** (sai "sem autenticação", entra "single-user com
+login local"). O mecanismo é a DEC-016.
+
+## Consequências
+
+- Acesso ao app passa a exigir autenticação; RNF-001 muda (registrado aqui, não deixa fóssil no PRD).
+- **INV-003 preservado** — login é local, offline e single-user; a linha `INV-003` da `Constitution.md`
+  **não** muda (não é `[muda invariante]`). A nota de coerência da Constitution §3 passa a apontar para esta DEC.
+- Introduz dependência de autenticação (ver DEC-016). Afeta PRD §6/§7/§8/§10 e ARCHITECTURE §1/§2/§5/§8.
+
+---
+
+# DEC-016 [TECH] streamlit-authenticator + cookie para sessão persistente
+
+## Contexto
+
+RF-011 exige manter a usuária logada entre recarregamentos (F5), com usuário+senha. O
+`session_state` do Streamlit não sobrevive a um refresh de página.
+
+## Alternativas consideradas
+
+- **Só `session_state`** — descartado: re-pede a senha a cada F5; não atende RF-011.
+- **Cookie caseiro + checagem própria de senha** — descartado: autenticação feita à mão é risco
+  de segurança; melhor uma biblioteca testada.
+- **OAuth / `st.login` (provedor externo)** — descartado: identidade externa violaria INV-003/offline.
+
+## Decisão
+
+Usar **`streamlit-authenticator`**: usuário+senha com senha em **hash** (bcrypt), cookie JWT
+**local** com expiração configurável para persistir a sessão. Credenciais (hash) e a chave do
+cookie vivem em config/segredos **local** (`.streamlit/secrets.toml` ou config YAML), fora do git.
+
+## Consequências
+
+- RF-011 atendido (persistência por cookie); auth delegada a lib testada, não caseira.
+- +1 dependência (`streamlit-authenticator`) em `requirements.txt` — a adicionar na implementação (Fase 2).
+- A PM configura usuário/senha e a chave do cookie localmente; a senha em texto nunca é commitada
+  nem vista pelo agente (RNF-004). Cookie é browser-local — sem rede, INV-003 preservado.
