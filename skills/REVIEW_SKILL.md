@@ -27,13 +27,13 @@ validação para os paths reais quando rodar por arquivo.
 
 - A **fronteira leitura/escrita de protocolo** foi respeitada? UI (`app/app.py`) **não
   escreve em `protocolos.db`** (INV-002); escrita de protocolo só nos scripts offline de
-  `scripts/`. O **diário** (Fase 5) grava anotações do usuário em armazenamento próprio na
-  nuvem — nunca em `protocolos.db` (DEC-017/DEC-018, `RULES §10`).
+  `scripts/`. O **diário e o checklist** (Fase 5) gravam dados do usuário em armazenamento
+  próprio na nuvem — nunca em `protocolos.db` (DEC-017/DEC-018/DEC-020, `RULES §10-11`).
 - Nenhum ORM nem camada de abstração de banco introduzido (DEC-006 / ARCHITECTURE §8).
 - Funções SQL continuam separadas das funções de render dentro de `app/app.py` — a task
   não piorou o acoplamento já conhecido.
 - Nenhum non-goal foi violado (ARCHITECTURE §8): sem multiusuário, sem API de rede própria, sem
-  edição de **protocolo** pela UI. Rede em runtime **só** para o diário (INV-003 reescrito — DEC-017);
+  edição de **protocolo** pela UI. Rede em runtime **só** para os recursos pessoais (diário e checklist; INV-003 reescrito — DEC-017);
   o núcleo de protocolo segue offline.
 - Erros seguem o padrão de `ARCHITECTURE §6`: ETL com transação+rollback (um único
   commit — vigiar o risco R4); UI trata "fase não encontrada" com `st.error` sem exceção.

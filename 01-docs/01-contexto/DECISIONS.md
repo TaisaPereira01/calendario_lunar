@@ -1,6 +1,6 @@
 # DECISIONS — Planner Lunar Integrativo
 
-**Versão:** 2.2
+**Versão:** 2.3
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 
@@ -8,7 +8,8 @@
 > DEC-001…010 correspondem 1:1 às ADRs originais (v1.0), agora com tag de origem e a seção
 > "Alternativas consideradas". DEC-011…014 emergiram da adoção Oya (2026-07-31); DEC-015…016
 > do ciclo de evolução do login (Fase 5, 2026-07-31); DEC-017…018 do ciclo do diário (Fase 5,
-> 2026-07-31) — DEC-017 é `[muda invariante]`.
+> 2026-07-31) — DEC-017 é `[muda invariante]`; DEC-019…020 do ciclo da View Fase Lunar +
+> checklist (Fase 5, 2026-07-31) — **sem** mudança de invariante.
 
 ---
 
@@ -193,8 +194,8 @@ O banco suporta diferentes formas de consulta.
 
 ## Decisão
 
-O app evolui em modos: Hoje (V2.0), Semana (V2.1), Fase Lunar (V2.2, futuro), Biblioteca e
-Estatísticas (futuros). Ver PRD §11.
+O app evolui em modos: Hoje (V2.0), Semana (V2.1), Fase Lunar (**realizada** em DEC-019),
+Diário (DEC-017), Biblioteca e Estatísticas (futuros). Ver PRD §11.
 
 ## Consequências
 
@@ -268,6 +269,10 @@ Escopo atual permanece focado no que já funciona. O login, quando implementado,
 ao INV-003 (usuário único / local / offline) mas não o viola por si só; ainda assim exigirá
 uma DEC própria que confirme explicitamente esse ponto (ver nota de coerência em
 `Constitution.md` §3).
+
+> **Fase 5 (2026-07-31):** as três evoluções previstas aqui foram tratadas — login **entregue**
+> (DEC-015/DEC-016); View Fase Lunar e "marcar itens como concluídos" (checklist) **decididos e
+> especificados** (DEC-019/DEC-020; implementação em T-008…T-010).
 
 ---
 
@@ -456,3 +461,70 @@ local), **nunca** no repositório (RNF-005). A biblioteca de acesso (ex.: `gspre
 - A PM cria a planilha e o service account uma vez, guiada por passo a passo (como no login); a credencial nunca é commitada nem vista pelo agente.
 - Introduz o único ponto de rede em runtime (INV-003 reescrito na DEC-017); a fronteira é isolada num módulo próprio, testável por mock.
 - Camadas de segurança: login (quem entra) + secrets fora do git (a chave) + planilha privada da conta (onde o dado mora). Honestidade registrada: o provedor (Google) tecnicamente lê o conteúdo em repouso — privado para terceiros, não ponta-a-ponta.
+
+---
+
+# DEC-019 [FUNC] View "Fase Lunar"
+
+## Contexto
+
+Ciclo de evolução (Fase 5). A view "Fase Lunar" era um placeholder na UI (prevista em DEC-009
+e listada como futura em DEC-012). A PM decidiu realizá-la: consultar o protocolo de
+uma fase **sem depender de uma data específica** — útil para planejar/estudar a fase inteira.
+
+## Alternativas consideradas
+
+- **Manter o placeholder** — descartado: a PM pediu a feature.
+- **Mostrar só um resumo da fase** (objetivo/nutrição) — descartado: o valor está em ver o protocolo completo; a view Semana já prova o layout de 7 dias.
+
+## Decisão
+
+Realizar a view **Fase Lunar**: a usuária escolhe uma das 4 fases e vê seu protocolo completo
+(os 7 dias, mesmo layout da view Semana). Cria RF-014 e AC-PHASE-01 no PRD. É **leitura pura**
+sobre o SQLite — reusa `vw_protocol` / a consulta por fase que já existe (`get_protocol_week`),
+mais uma consulta das fases (`get_phases`). Não guarda estado.
+
+## Consequências
+
+- **Sem impacto em invariante:** é leitura de protocolo (dentro de INV-002/INV-004), offline.
+- Realiza o modo previsto em DEC-009 e a evolução prevista em DEC-012.
+- Afeta PRD §6/§8/§11 e ARCHITECTURE §2/§3.
+
+---
+
+# DEC-020 [FUNC] Checklist de itens concluídos
+
+## Contexto
+
+Ciclo de evolução (Fase 5). A PM quer marcar, no dia, quais itens do protocolo já cumpriu, e ver
+esse estado ao reabrir a data — base para, no futuro, acompanhar adesão. É **dado criado pelo
+usuário** que precisa persistir.
+
+## Alternativas consideradas
+
+- **Só na sessão (sem persistir)** — descartado: perderia a marcação ao recarregar; não atende RF-016.
+- **Guardar no SQLite de protocolos** — descartado: fere INV-004 (SQLite é só protocolos) e o app é só-leitura sobre protocolos (INV-002). Dado do usuário usa armazenamento próprio.
+- **Nova planilha/credencial separada** — descartado: desnecessário. Reusa a planilha e a credencial `[diario]` (mesma conta de serviço), numa **aba própria** — a PM não configura nada novo.
+- **Checklist numa tela separada** — descartado: a PM escolheu as caixinhas **inline na aba Hoje** (marcar conforme faz).
+
+## Decisão
+
+Adicionar um **checklist**: na aba **Hoje**, cada item do protocolo do dia ganha uma caixinha;
+marcar/desmarcar persiste o estado "concluído" (RF-015). O estado é **por data** e reaparece ao
+reabrir a data (RF-016). Cria RF-015/RF-016 e AC-CHECK-01/02 no PRD; generaliza RNF-002/RNF-005
+(que passam a cobrir diário **e** checklist).
+
+**Armazenamento:** Google Sheets, **mesma planilha e credencial do diário** (`[diario]`), numa aba
+`concluidos`. Chave de **upsert** por `(data, período, item)` — marcar/desmarcar nunca duplica
+(AC-CHECK-01/02). Reusa o mecanismo de acesso da DEC-018.
+
+## Consequências
+
+- **Sem mudança de invariante:** o checklist é dado do usuário em armazenamento próprio na nuvem —
+  exatamente o que os invariantes **já permitem** desde a reescrita do diário (DEC-017). Registra
+  apenas uma **nota de coerência** na `Constitution.md` §3; a tabela de invariantes **não** muda.
+- Renderização da aba **Hoje** passa de card HTML para itens interativos (caixinhas) — refactor
+  local, sem tocar a consulta de protocolo.
+- Falha do checklist (rede/credencial) é isolada: a aba Hoje ainda lista o protocolo, só a marcação
+  fica indisponível com aviso (ARCHITECTURE §6).
+- Afeta PRD §6/§7/§8/§11, ARCHITECTURE §2/§3/§4/§6 e RULES (nova seção do checklist).

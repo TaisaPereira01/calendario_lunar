@@ -1,6 +1,6 @@
 # PRD — Planner Lunar Integrativo
 
-**Versão:** 2.2
+**Versão:** 2.3
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Status:** Aprovado
@@ -18,8 +18,8 @@ diária de protocolos de alimentação, suplementação, exercícios físicos e 
 terapêuticas, organizados conforme a fase atual da Lua e o dia da semana.
 
 O sistema identifica a fase lunar da data e apresenta o protocolo completo do dia,
-agrupado por período. Uso pessoal, single-user. A consulta de protocolos é offline; o
-diário pessoal (evolução Fase 5) usa armazenamento em nuvem privado.
+agrupado por período. Uso pessoal, single-user. A consulta de protocolos é offline; os
+recursos pessoais (diário e checklist) usam armazenamento em nuvem privado.
 
 ---
 
@@ -28,7 +28,7 @@ diário pessoal (evolução Fase 5) usa armazenamento em nuvem privado.
 Centralizar os protocolos terapêuticos em um único aplicativo simples, eliminando a
 consulta manual a planilhas no dia a dia. O Excel permanece como fonte de edição dos
 protocolos; o app é somente leitura sobre os protocolos. Sobre esse núcleo, a usuária
-pode registrar anotações pessoais diárias (diário).
+pode registrar anotações pessoais diárias (diário) e marcar itens como concluídos (checklist).
 
 ---
 
@@ -59,20 +59,22 @@ Consulta o protocolo no SQLite (views vw_calendar / vw_protocol)
         ↓
 Exibe o protocolo completo, agrupado por período
         ↓
-(opcional) Usuário registra/edita a anotação do diário para a data
+(opcional) Marca itens como concluídos no dia · registra a anotação do diário
+        ↓
+(alternativa) Escolhe uma fase e vê o protocolo dela (view Fase Lunar)
 ```
 
 O banco de protocolos é alimentado offline pelo pipeline **Excel → import_excel.py → SQLite**.
-As anotações do diário são gravadas/lidas em armazenamento em nuvem privado (ver DEC-018).
+As anotações do diário e as marcações do checklist são gravadas/lidas em armazenamento em
+nuvem privado (ver DEC-018 / DEC-020).
 
 ---
 
 # 6. Requisitos Funcionais
 
-Requisitos do sistema **em funcionamento hoje** (RF-001…011) mais os do ciclo de evolução
-do diário (RF-012…013). Sem tag `[no-code]`/`[no-test]`, o framework espera código e teste
-ligados a cada um (a estratégia de testes é definida na Etapa 1.6; hoje a cobertura de
-protocolo/login está descrita no `TESTING_STRATEGY.md`).
+Requisitos do sistema **em funcionamento hoje** (RF-001…011) mais os dos ciclos de evolução
+do diário (RF-012…013) e da Fase Lunar + checklist (RF-014…016). Sem tag `[no-code]`/`[no-test]`,
+o framework espera código e teste ligados a cada um.
 
 | ID | Descrição |
 |---|---|
@@ -88,7 +90,10 @@ protocolo/login está descrita no `TESTING_STRATEGY.md`).
 | RF-010 | O app exige login (usuário + senha) antes de exibir qualquer protocolo. Ver [DEC-015](DECISIONS.md). |
 | RF-011 | A sessão de login permanece ativa entre recarregamentos da página (cookie local), até logout ou expiração. Ver [DEC-016](DECISIONS.md). |
 | RF-012 | Para a data selecionada, a usuária pode escrever, editar e salvar uma anotação de texto livre no diário. Ver [DEC-017](DECISIONS.md). |
-| RF-013 | A anotação do diário persiste em nuvem privada e reaparece ao selecionar a mesma data, em qualquer dispositivo (celular incluído). Ver [DEC-018](DECISIONS.md). |
+| RF-013 | A anotação do diário persiste em nuvem privada e reaparece ao selecionar a mesma data, em qualquer dispositivo. Ver [DEC-018](DECISIONS.md). |
+| RF-014 | Uma view **Fase Lunar** permite escolher uma das 4 fases e ver o protocolo completo dela (os 7 dias), sem depender de uma data. Ver [DEC-019](DECISIONS.md). |
+| RF-015 | Na consulta do dia, a usuária pode marcar/desmarcar cada item do protocolo como **concluído**. Ver [DEC-020](DECISIONS.md). |
+| RF-016 | O estado "concluído" persiste por data (nuvem privada) e reaparece ao reabrir a mesma data. Ver [DEC-020](DECISIONS.md). |
 
 ---
 
@@ -97,10 +102,10 @@ protocolo/login está descrita no `TESTING_STRATEGY.md`).
 | ID | Descrição |
 |---|---|
 | RNF-001 | A aplicação roda para um único usuário, com login local — sem servidor de autenticação nem identidade externa. |
-| RNF-002 | A consulta de protocolos funciona offline — sem chamadas de rede em runtime. Chamadas de rede em runtime ficam **restritas ao recurso de diário** (RF-012/RF-013). |
+| RNF-002 | A consulta de protocolos funciona offline — sem chamadas de rede em runtime. Chamadas de rede em runtime ficam **restritas aos recursos pessoais** (diário e checklist — RF-012/RF-013/RF-015/RF-016). |
 | RNF-003 | Data fora do calendário carregado produz uma mensagem clara ao usuário, sem interromper a aplicação. |
-| RNF-004 | Credenciais (senha em hash), a chave do cookie e a credencial de acesso ao diário vivem em config/segredos local (secrets), fora do git; nenhum dado de login trafega em rede. |
-| RNF-005 | As anotações do diário ficam num armazenamento em nuvem **privado** (Google Sheets, conta da usuária), acessado por credencial de service account guardada nos secrets — nunca no repositório. |
+| RNF-004 | Credenciais (senha em hash), a chave do cookie e a credencial de acesso à nuvem vivem em config/segredos local (secrets), fora do git; nenhum dado de login trafega em rede. |
+| RNF-005 | As anotações do diário **e as marcações do checklist** ficam num armazenamento em nuvem **privado** (Google Sheets, conta da usuária), acessado por credencial de service account guardada nos secrets — nunca no repositório. |
 
 > O princípio "Excel é a única fonte de verdade dos protocolos" está registrado como
 > decisão em `DECISIONS.md` (DEC-002 / DEC-008), não como requisito.
@@ -110,7 +115,8 @@ protocolo/login está descrita no `TESTING_STRATEGY.md`).
 # 8. Critérios de Aceite
 
 Cada critério é verificável por teste. Componentes: **APP** (interface), **ETL**
-(importação), **CAL** (calendário), **DB** (banco), **AUTH** (login), **DIA** (diário).
+(importação), **CAL** (calendário), **DB** (banco), **AUTH** (login), **DIA** (diário),
+**PHASE** (view Fase Lunar), **CHECK** (checklist).
 
 | ID | Critério | Como verificar |
 |---|---|---|
@@ -127,6 +133,9 @@ Cada critério é verificável por teste. Componentes: **APP** (interface), **ET
 | AC-AUTH-02 | Após recarregar a página (F5), a usuária logada continua logada | Com sessão válida (cookie), o F5 não volta à tela de login até expirar/deslogar |
 | AC-DIA-01 | Salvar uma anotação para uma data e reabrir a mesma data mostra o texto salvo | Escrever nota na data D, recarregar/reabrir D → o texto persiste |
 | AC-DIA-02 | Uma data tem no máximo uma anotação — reeditar substitui, não duplica | Salvar 2× na data D mantém uma única linha para D no armazenamento (upsert por data) |
+| AC-PHASE-01 | Escolher uma fase mostra o protocolo daquela fase (7 dias) | Selecionar "Lua Cheia" lista os 7 dias com os itens da Lua Cheia |
+| AC-CHECK-01 | Marcar um item e reabrir a mesma data mostra o item marcado | Marcar item X na data D, recarregar D → X continua marcado |
+| AC-CHECK-02 | Desmarcar um item remove a marcação | Desmarcar X na data D → ao reabrir, X aparece desmarcado (sem duplicar linha — upsert) |
 
 ---
 
@@ -134,13 +143,14 @@ Cada critério é verificável por teste. Componentes: **APP** (interface), **ET
 
 Não faz parte desta versão (podem virar requisitos futuros — ver §11):
 
-* múltiplos usuários e sincronização de **protocolos** em nuvem (o diário sincroniza só anotações pessoais, single-user)
+* múltiplos usuários e sincronização de **protocolos** em nuvem (os recursos pessoais sincronizam só dados da usuária, single-user)
 * notificações
 * edição dos protocolos pelo aplicativo (edição permanece no Excel)
 * recomendações por IA
 * lista de compras
 * integração com Google Calendar
-* diário com campos estruturados (humor, sintomas), múltiplas anotações por dia, busca ou estatísticas — o diário atual é uma anotação de texto livre por data
+* diário com campos estruturados (humor, sintomas), múltiplas anotações por dia
+* estatísticas / relatórios de adesão do checklist (o dado é coletado; o relatório é evolução futura)
 
 ---
 
@@ -152,21 +162,19 @@ Não faz parte desta versão (podem virar requisitos futuros — ver §11):
 * openpyxl (leitura do Excel)
 * skyfield (cálculo das fases lunares)
 * streamlit-authenticator (login local usuário+senha com cookie de sessão — ver DEC-016)
-* Google Sheets como armazenamento do diário, via credencial de service account (ver DEC-018)
+* Google Sheets como armazenamento dos recursos pessoais (diário e checklist), via credencial de service account (ver DEC-018 / DEC-020)
 
 ---
 
 # 11. Evoluções Futuras
 
-Prioridades escolhidas pela PM na adoção Oya (2026-07-31). O **login** (RF-010/RF-011,
-DEC-015/016) e o **diário** (RF-012/RF-013, DEC-017/018) já saíram desta lista e viraram
-ciclos de evolução. Restam:
+O **login** (RF-010/RF-011) e o **diário** (RF-012/RF-013) foram **entregues**. A **View Fase
+Lunar** (RF-014, DEC-019) e o **checklist** (RF-015/RF-016, DEC-020) foram **decididos e
+especificados neste ciclo** — implementação em T-008…T-010. Todos já saíram do backlog.
 
-1. **View "Fase Lunar"** — consultar protocolos por fase da Lua, sem depender de uma data específica (hoje é placeholder na interface).
-2. **Marcar itens como concluídos** — checklist diário do que já foi cumprido.
-
-Backlog adicional (sem prioridade definida): histórico, estatísticas, favoritos,
-exportação em PDF, calendário lunar multi-ano automático, diário estruturado.
+Backlog adicional (sem prioridade definida): **estatísticas / gráficos de adesão** do checklist
+(ex.: via Looker Studio sobre a planilha), histórico, favoritos, exportação em PDF, calendário
+lunar multi-ano automático, diário estruturado, lembretes (Google Calendar / e-mail).
 
 ---
 
@@ -176,5 +184,6 @@ exportação em PDF, calendário lunar multi-ano automático, diário estruturad
 |---|---|---|
 | 1.0 | 2026-06 | PRD inicial (prosa), status "Aprovado". |
 | 2.0 | 2026-07-31 | Adoção Oya, Etapa 1.1: requisitos ganham IDs verificáveis (RF/RNF/AC); evoluções futuras atualizadas com prioridades da PM. |
-| 2.1 | 2026-07-31 | Ciclo de evolução (Fase 5): login de usuário único — RF-010/RF-011, RNF-004, AC-AUTH-01/02; RNF-001 reescrito (sai "sem autenticação"). Ver DEC-015/DEC-016. |
-| 2.2 | 2026-07-31 | Ciclo de evolução (Fase 5): diário pessoal — RF-012/RF-013, RNF-005, AC-DIA-01/02; RNF-002 reescrito (rede em runtime restrita ao diário). Muda INV-002/003/004. Ver DEC-017/DEC-018. |
+| 2.1 | 2026-07-31 | Ciclo de evolução (Fase 5): login de usuário único — RF-010/RF-011, RNF-004, AC-AUTH-01/02; RNF-001 reescrito. Ver DEC-015/DEC-016. |
+| 2.2 | 2026-07-31 | Ciclo de evolução (Fase 5): diário pessoal — RF-012/RF-013, RNF-005, AC-DIA-01/02; RNF-002 reescrito. Muda INV-002/003/004. Ver DEC-017/DEC-018. |
+| 2.3 | 2026-07-31 | Ciclo de evolução (Fase 5): View Fase Lunar (RF-014, DEC-019) + checklist de concluídos (RF-015/RF-016, DEC-020); RNF-002/005 generalizados para os recursos pessoais; AC-PHASE-01, AC-CHECK-01/02. **Sem mudança de invariante** (o checklist conforma aos invariantes reescritos na DEC-017). |

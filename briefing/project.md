@@ -21,9 +21,10 @@ de uma data e exibe o protocolo completo do dia, agrupado por período.
 Uso **pessoal, single-user**. O Excel permanece como fonte de edição dos protocolos;
 **sobre os protocolos, o app é somente leitura e offline** — elimina a consulta manual à
 planilha no dia a dia. O banco de protocolos (SQLite) é alimentado offline pelo pipeline
-**Excel → `import_excel.py` → SQLite**. A partir da Fase 5, o app também tem um **diário
-pessoal** que grava anotações do usuário em nuvem privada (Google Sheets) — um domínio
-separado dos protocolos, que não toca o SQLite nem o Excel (DEC-017/DEC-018).
+**Excel → `import_excel.py` → SQLite**. A partir da Fase 5, o app também tem **recursos
+pessoais** que gravam dados do usuário em nuvem privada (Google Sheets) — um **diário**
+(anotações) e um **checklist** de concluídos, domínio separado dos protocolos, que não toca
+o SQLite nem o Excel (DEC-017/DEC-018/DEC-020).
 
 ---
 
@@ -88,7 +89,7 @@ Extraídas de `RULES.md` — somam-se às regras canônicas do framework, não a
 - Dias da semana: **Segunda = 1 … Domingo = 7** (`get_weekday_id = date.weekday() + 1`) (`RULES#5`).
 - Importação Excel → banco roda em **transação única**; itens repetidos são normalizados — um `item` reutilizado por vários `protocol_item` (`RULES#6`).
 - Os **10 tipos de item** têm ícone fixo; não crie tipo/ícone novo sem `DEC` correspondente (`RULES#7`).
-- Sobre os **protocolos**, a UI é **somente leitura** em runtime; toda escrita de protocolo acontece offline nos scripts de `scripts/` (INV-002 / INV-004). O **diário** (Fase 5) grava anotações do usuário em nuvem privada, nunca em `protocolos.db` (DEC-017/DEC-018, `RULES §10`, ARCHITECTURE §2).
+- Sobre os **protocolos**, a UI é **somente leitura** em runtime; toda escrita de protocolo acontece offline nos scripts de `scripts/` (INV-002 / INV-004). O **diário e o checklist** (Fase 5) gravam dados do usuário em nuvem privada, nunca em `protocolos.db` (DEC-017/DEC-018/DEC-020, `RULES §10-11`, ARCHITECTURE §2).
 - **SQL puro, sem ORM** — decisão deliberada (DEC-006 / ARCHITECTURE §8).
 - Ao usar `unsafe_allow_html` em `render_period_card`, **escape** o conteúdo do Excel antes de montar o HTML (ARCHITECTURE §7).
 

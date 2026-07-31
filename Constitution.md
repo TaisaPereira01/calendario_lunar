@@ -1,6 +1,6 @@
 # Constitution — Planner Lunar Integrativo
 
-**Versão:** 0.3
+**Versão:** 0.4
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Documento crítico** — alterações exigem atualização do bloco "Histórico do documento".
@@ -14,6 +14,7 @@
 | 0.1 | 2026-07-31 | Rascunho inicial (adoção Oya, Etapa 1.1). 4 invariantes elicitados com a PM, derivados das ADRs. |
 | 0.2 | 2026-07-31 | Ciclo do login (Fase 5): nota de coerência do INV-003 passa a apontar para DEC-015/016. A tabela de invariantes **não** mudou (login preserva o INV-003). |
 | 0.3 | 2026-07-31 | Ciclo do diário (Fase 5): INV-002, INV-003 e INV-004 **reescritos** para escopar suas garantias aos **protocolos**, abrindo espaço controlado para o diário (escrita + nuvem privada). Ver DEC-017 `[muda invariante]` / DEC-018. INV-001 intacto. |
+| 0.4 | 2026-07-31 | Ciclo Fase Lunar + checklist (Fase 5): **tabela inalterada**. A View Fase Lunar é leitura (dentro de INV-002/004) e o checklist é dado do usuário na nuvem própria, já permitido pelos invariantes reescritos na DEC-017. Adicionada só a nota de coerência do checklist. Ver DEC-019/DEC-020. |
 
 ---
 
@@ -58,3 +59,9 @@ se depreca, DEC registra a superseção e a linha da tabela é reescrita para o 
 > suas garantias aos **protocolos** (que seguem só-leitura, offline, só-SQLite), abrindo espaço
 > controlado para o diário. Registrado em [DEC-017](01-docs/01-contexto/DECISIONS.md)
 > `[muda invariante]` e [DEC-018](01-docs/01-contexto/DECISIONS.md). INV-001 permanece intacto.
+
+> **Nota de coerência (checklist):** o checklist de itens concluídos (ciclo Fase 5, RF-015/RF-016)
+> é **dado do usuário em armazenamento próprio na nuvem** — exatamente o que INV-002/INV-003/INV-004
+> **já permitem** desde a reescrita do diário (DEC-017). Portanto **não muda a tabela** e não é
+> `[muda invariante]`. A View Fase Lunar (RF-014) é leitura de protocolo, dentro de INV-002/INV-004.
+> Registrado em [DEC-019](01-docs/01-contexto/DECISIONS.md) e [DEC-020](01-docs/01-contexto/DECISIONS.md).

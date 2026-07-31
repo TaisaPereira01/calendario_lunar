@@ -1,6 +1,6 @@
 # TASKS — Planner Lunar Integrativo
 
-**Versão:** 0.2
+**Versão:** 0.3
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Perfil:** Oya Lite (sem RTM) — lista de tasks; execução via `/oya-f2-implement`.
@@ -106,3 +106,51 @@
 - **REQs:** RF-012, RF-013
 - **Depende:** T-006
 - **Status:** ✅ done (2026-07-31)
+
+---
+
+## Ciclo: View Fase Lunar + Checklist
+
+> Fase 5, PRD §6 RF-014/RF-015/RF-016, AC-PHASE-01, AC-CHECK-01/02, DEC-019/DEC-020.
+> **Sem mudança de invariante.** O checklist reusa a credencial/planilha `[diario]` (aba
+> `concluidos`) — a PM **não configura nada novo**. Formato: `OYA_DOC_STANDARD.md §9`.
+
+### T-008 — View "Fase Lunar" (`app/app.py`)
+
+- **Escopo:** realizar a `view_phase` (hoje placeholder): listar as 4 fases (consulta `get_phases`),
+  a usuária escolhe uma e o app mostra o protocolo completo dela (os 7 dias, mesmo layout da view
+  Semana) via `get_protocol_week(phase_id)`. Leitura pura, sem estado.
+- **Entrada:** views/consultas de protocolo existentes.
+- **Saída:** `app.py` com a view Fase Lunar funcional (substitui o placeholder).
+- **Aceite:** AC-PHASE-01 (escolher uma fase mostra o protocolo dela, 7 dias).
+- **REQs:** RF-014
+- **Depende:** —
+- **Status:** ⏳ pending
+
+### T-009 — Armazenamento do checklist (`app/checklist.py`)
+
+- **Escopo:** módulo que lê/grava o estado "concluído" no Google Sheets, na aba `concluidos` da
+  **mesma planilha/credencial do diário** (`[diario]`). `load_done(secrets, data)` retorna o
+  conjunto de itens concluídos da data; `set_done(secrets, data, item_key, done)` grava por
+  **upsert** em `(data, período, item)`. Fronteira de rede isolada, testável por mock; wrappers
+  "safe" que não deixam exceção subir (isolamento, como no diário).
+- **Entrada:** credencial `[diario]` já configurada (nada novo para a PM).
+- **Saída:** `app/checklist.py` + `tests/test_checklist.py` (upsert + isolamento).
+- **Aceite:** AC-CHECK-02 (marcar/desmarcar a mesma data×item não duplica — upsert); falha vira
+  mensagem, não exceção.
+- **REQs:** RF-016
+- **Depende:** —
+- **Status:** ⏳ pending
+
+### T-010 — Checklist inline na aba Hoje (`app/app.py`)
+
+- **Escopo:** na view Hoje, renderizar cada item do protocolo com uma **caixinha** (`st.checkbox`)
+  refletindo o estado salvo; marcar/desmarcar persiste (via T-009). Degradação graciosa: se o
+  armazenamento falhar, os itens continuam listados e só a marcação fica indisponível, com aviso.
+- **Entrada:** armazenamento do checklist (T-009).
+- **Saída:** `app.py` com o checklist inline na aba Hoje.
+- **Aceite:** AC-CHECK-01 (marcar e reabrir a data mostra marcado); a aba Hoje ainda lista o
+  protocolo se o checklist estiver indisponível (isolamento).
+- **REQs:** RF-015
+- **Depende:** T-009
+- **Status:** ⏳ pending

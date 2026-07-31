@@ -29,9 +29,9 @@ seção aponta para o trecho canônico que a governa.
 - **Sobre os protocolos, a UI é somente leitura em runtime** (INV-002 / INV-004): nenhum
   código de `app/app.py` escreve em `protocolos.db`; toda escrita de protocolo acontece
   **offline** nos scripts de `scripts/` (`create_database.py`, `import_excel.py`,
-  `generate_moon_calendar.py`). **Exceção do diário (Fase 5):** a view Diário grava
-  anotações do usuário em armazenamento próprio na nuvem (Google Sheets), **nunca** em
-  `protocolos.db` — domínio separado (DEC-017/DEC-018, `RULES §10`).
+  `generate_moon_calendar.py`). **Exceção dos recursos pessoais (Fase 5):** a view Diário e
+  o checklist da aba Hoje gravam dados do usuário em armazenamento próprio na nuvem (Google
+  Sheets), **nunca** em `protocolos.db` — domínio separado (DEC-017/DEC-018/DEC-020, `RULES §10-11`).
 - Persistência é **SQLite + SQL puro, sem ORM** (DEC-006). Não introduza ORM nem camada
   de abstração de banco.
 

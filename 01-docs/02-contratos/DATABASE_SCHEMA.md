@@ -1,6 +1,6 @@
 # DATABASE_SCHEMA — Planner Lunar Integrativo
 
-**Versão:** 2.0
+**Versão:** 2.1
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Status:** Aprovado
@@ -13,6 +13,7 @@
 |---|---|---|
 | 1.0 | 2026-06-28 | Modelo inicial (descrevia pipeline JSON). |
 | 2.0 | 2026-07-31 | Reconciliado com o schema real na adoção Oya (Etapa 1.7): pipeline Excel→SQLite (DEC-003), tabela `moon_calendar` documentada, views `vw_protocol`/`vw_calendar` (removido o fóssil `vw_today`), 10 tipos de item. Valores de referência deixam de ser duplicados aqui — passam a apontar para `database/seed.sql` e `RULES.md` (higiene H9). |
+| 2.1 | 2026-07-31 | §12 esclarece que os dados do usuário (diário, checklist) vivem em armazenamento próprio (Google Sheets), **não** no SQLite — o banco segue só-protocolos (INV-004). Sem mudança de schema. Ver DEC-018/DEC-020. |
 
 ---
 
@@ -155,5 +156,8 @@ database/schema.sql + seed.sql ─► create_database.py ─► estrutura + tabe
 
 ## 12. Evolução do Modelo
 
-Projetado para evoluções sem mudança estrutural: checklist diário, histórico, favoritos,
-estatísticas (ver PRD §11 e DEC-009).
+Projetado para evoluções na camada de apresentação sem mudança estrutural do banco (ver PRD §11
+e DEC-009). **Importante (INV-004):** os **dados criados pelo usuário** — diário (DEC-018) e
+checklist de concluídos (DEC-020) — **não** ficam neste SQLite; vivem em armazenamento próprio
+(Google Sheets). Este banco permanece **só de protocolos**. Uma futura estatística de adesão do
+checklist consumiria a planilha do usuário (ex.: Looker Studio), não uma tabela aqui.
