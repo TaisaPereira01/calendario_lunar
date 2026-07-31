@@ -107,6 +107,47 @@ PERIODS = {
 
 
 # =============================================================================
+# RECLASSIFICAÇÃO DE SUPLEMENTOS (RULES §7)
+# =============================================================================
+# Alguns suplementos ficam em períodos cujo tipo padrão não é SUPPLEMENT — ex.:
+# Magnésio / Ashwagandha / probiótico tomados em "Antes de Dormir" (padrão ROUTINE).
+# São reclassificados como SUPPLEMENT pelo NOME, para o tipo e o ícone (💊)
+# refletirem a realidade em todas as telas. Casado por palavra-chave (robusto a
+# variação de dose).
+
+SUPPLEMENT_KEYWORDS = (
+
+    "magnésio",
+
+    "magnesio",
+
+    "ashwagandha",
+
+    "lactobacillus",
+
+    "bifidobacterium",
+
+    "probiótico",
+
+    "probiotico",
+
+)
+
+
+def reclassify_supplement(item):
+    """
+    Marca o item como SUPPLEMENT se o nome casar um suplemento conhecido,
+    sobrescrevendo o tipo padrão do período. Ver RULES §7.
+    """
+
+    if any(k in item["name"].lower() for k in SUPPLEMENT_KEYWORDS):
+
+        item["type"] = "SUPPLEMENT"
+
+    return item
+
+
+# =============================================================================
 # CACHE
 # =============================================================================
 
@@ -515,6 +556,8 @@ def iter_sheet(sheet_name):
             )
 
             for item in items:
+
+                reclassify_supplement(item)
 
                 yield (
 

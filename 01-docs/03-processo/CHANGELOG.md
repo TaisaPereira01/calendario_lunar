@@ -43,11 +43,11 @@ semântico quando o produto ganhar releases.
 - Testes automatizados: `tests/test_parse_cell.py` (13 casos) e `tests/test_login.py` (4 casos),
   pytest. Parsing de células extraído para `scripts/parsing.py` (puro, sem efeitos colaterais).
 
-### Alterado
-- **Ícone do período "Antes de Dormir"** trocado da luinha 🌙 para a pílula 💊 — é uma seção de
-  suplementos, como "Suplementos Manhã/Tarde". Ajuste visual em `PERIOD_ICONS` (`app/app.py`).
-
 ### Corrigido
+- **Ícone dos suplementos "Antes de Dormir"**: Magnésio, Ashwagandha e o probiótico apareciam
+  com ☀️ (rotina) porque o período os tipava como ROUTINE; agora o import os reclassifica como
+  **suplemento** e eles mostram 💊 em todas as telas (Hoje, Semana, Fase Lunar). Banco reimportado
+  (627 protocolos). Ver `RULES §7`. Pedido da PM.
 - **BUG-001:** "(Sempre com alguma gordura)" aparecia como item separado na lista de
   suplementos; agora é exibido como nota da "Vitamina D3" (linha entre parênteses no Excel
   vira observação do item anterior). Banco reimportado (652 → 633 protocolos).

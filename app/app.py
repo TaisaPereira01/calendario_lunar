@@ -156,7 +156,7 @@ PERIOD_ICONS = {
 
     "Jantar": "🍲",
 
-    "Antes de Dormir": "💊",
+    "Antes de Dormir": "🌙",
 
     "Exercício": "🏃",
 

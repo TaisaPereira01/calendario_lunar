@@ -1,6 +1,6 @@
 # RULES — Planner Lunar Integrativo
 
-**Versão:** 0.5
+**Versão:** 0.6
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Documento crítico** — alterações exigem atualização do bloco "Histórico do documento".
@@ -16,6 +16,7 @@
 | 0.3 | 2026-07-31 | §6 ganhou a exceção de condição "Se ..." final = nota (BUG-002); parsing extraído para `scripts/parsing.py` com testes. |
 | 0.4 | 2026-07-31 | Ciclo do diário (Fase 5): §2 escopa "somente leitura" aos protocolos; nova §10 com as regras do diário (uma anotação por data, upsert). Ver DEC-017/DEC-018. |
 | 0.5 | 2026-07-31 | Ciclo Fase Lunar + checklist (Fase 5): nova §11 com as regras do checklist (upsert por data×período×item, armazenamento próprio); "Fora deste documento" vira §12. Ver DEC-019/DEC-020. |
+| 0.6 | 2026-07-31 | §7 ganhou a regra de **reclassificação de suplementos** no import (Magnésio/Ashwagandha/probiótico em "Antes de Dormir" viram SUPPLEMENT → 💊). Banco reimportado. Pedido da PM. |
 
 ---
 
@@ -75,6 +76,13 @@ Cada item tem um tipo, e cada tipo tem um ícone fixo:
 | DRINK | 🥤 | | HABIT | 🌱 |
 | SUPPLEMENT | 💊 | | SKINCARE | ✨ |
 | EXERCISE | 🏃 | | OBSERVATION | 📝 |
+
+**Reclassificação de suplementos (import).** Alguns suplementos ficam em períodos cujo tipo
+padrão não é SUPPLEMENT — ex.: **Magnésio, Ashwagandha e o probiótico** (Lactobacillus +
+Bifidobacterium) tomados em "Antes de Dormir", período de tipo ROUTINE. O `import_excel.py` os
+reclassifica como **SUPPLEMENT** pelo nome (`SUPPLEMENT_KEYWORDS`), para o tipo e o ícone (💊)
+refletirem a realidade em todas as telas. Casado por palavra-chave (robusto a variação de dose).
+Mantras, pedras e skincare do mesmo período seguem no tipo padrão (ROUTINE).
 
 ## 8. As quatro fases (objetivo e nutrição)
 
