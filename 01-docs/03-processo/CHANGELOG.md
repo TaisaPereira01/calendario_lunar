@@ -8,6 +8,9 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **Ícone de lua por fase**: o título de cada fase agora mostra a lua correspondente —
+  🌑 Lua Nova, 🌒 Lua Crescente, 🌕 Lua Cheia, 🌘 Lua Minguante (na aba Hoje, no título da
+  view Fase Lunar e no seletor de fases). Cosmético; fase desconhecida cai no 🌙 padrão. Pedido da PM.
 - **Checklist — caixinhas na aba Hoje** (T-010): cada item do protocolo do dia ganha uma
   caixinha; marcar/desmarcar salva por data e reaparece ao reabrir a data. Se o Google Sheets
   estiver indisponível, o protocolo continua listado com um aviso — não derruba o app (provado

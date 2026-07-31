@@ -35,6 +35,22 @@ def test_get_phases_retorna_as_4_fases(db):
         assert r["color"], f"fase {r['name']} sem cor"
 
 
+def test_cada_fase_tem_icone_de_lua_proprio():
+    """Cosmético: cada fase mostra a lua correspondente; nome fora do mapa cai no 🌙."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "app"))
+    import app
+
+    assert app.phase_icon("Lua Nova") == "🌑"
+    assert app.phase_icon("Lua Crescente") == "🌒"
+    assert app.phase_icon("Lua Cheia") == "🌕"
+    assert app.phase_icon("Lua Minguante") == "🌘"
+    assert app.phase_icon("Fase Inexistente") == "🌙"  # fallback
+    # todas as 4 fases do banco têm ícone dedicado (nenhuma cai no fallback)
+    assert all(app.phase_icon(n) != "🌙" for n in FASES)
+
+
 def test_protocolo_por_fase_cobre_os_7_dias(db):
     """AC-PHASE-01: escolher uma fase mostra o protocolo dela — os 7 dias."""
     for nome in FASES:

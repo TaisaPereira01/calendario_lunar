@@ -165,6 +165,28 @@ PERIOD_ICONS = {
 }
 
 
+# Ícone por fase lunar — cada fase mostra a lua correspondente (cosmético).
+# Fallback 🌙 para qualquer nome fora do mapa.
+
+PHASE_ICONS = {
+
+    "Lua Nova": "🌑",
+
+    "Lua Crescente": "🌒",
+
+    "Lua Cheia": "🌕",
+
+    "Lua Minguante": "🌘",
+
+}
+
+
+def phase_icon(name):
+    """Ícone da fase pelo nome; 🌙 se desconhecido."""
+
+    return PHASE_ICONS.get(name, "🌙")
+
+
 # =============================================================================
 # CSS
 # =============================================================================
@@ -544,7 +566,7 @@ def render_header(
     )
 
     st.title(
-        f"🌙 {phase['phase_name']}"
+        f"{phase_icon(phase['phase_name'])} {phase['phase_name']}"
     )
 
     st.caption(
@@ -883,13 +905,14 @@ def view_phase(selected_date):
         "Escolha a fase",
         names,
         index=default_idx,
+        format_func=lambda n: f"{phase_icon(n)} {n}",
     )
 
     escolhida = next(p for p in phases if p["name"] == escolhida_nome)
 
     load_css(escolhida["color"])
 
-    st.title(f"🌙 {escolhida['name']}")
+    st.title(f"{phase_icon(escolhida['name'])} {escolhida['name']}")
 
     with st.container(border=True):
 
