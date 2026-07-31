@@ -25,6 +25,8 @@ DATABASE_FILE = DATABASE_DIR / "protocolos.db"
 
 SCHEMA_FILE = DATABASE_DIR / "schema.sql"
 
+SEED_FILE = DATABASE_DIR / "seed.sql"
+
 VIEWS_FILE = DATABASE_DIR / "views.sql"
 
 
@@ -163,6 +165,8 @@ def main():
         print("Criando estrutura...")
 
         execute_sql_file(connection, SCHEMA_FILE)
+
+        execute_sql_file(connection, SEED_FILE)
 
         execute_sql_file(connection, VIEWS_FILE)
 
