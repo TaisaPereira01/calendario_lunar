@@ -10,6 +10,7 @@ from datetime import date
 import sqlite3
 
 import streamlit as st
+import streamlit_authenticator as stauth
 
 
 # =============================================================================
@@ -47,6 +48,71 @@ def get_connection():
 
 
 db = get_connection()
+
+
+# =============================================================================
+# AUTENTICAÇÃO
+# =============================================================================
+
+LOGIN_FIELDS = {
+
+    "Form name": "🌙 Planner Lunar — Acesso",
+
+    "Username": "Usuário",
+
+    "Password": "Senha",
+
+    "Login": "Entrar",
+
+}
+
+
+def build_authenticator():
+    """
+    Monta o autenticador a partir de .streamlit/secrets.toml (seção [auth]).
+
+    A senha vive em hash (auto_hash=False) — nada de senha em texto no código
+    nem no git. Retorna None se os segredos não estiverem configurados.
+    """
+
+    try:
+
+        cfg = st.secrets["auth"]
+
+    except Exception:
+
+        # Sem .streamlit/secrets.toml (ou sem a seção [auth]).
+        return None
+
+    credentials = {
+
+        "usernames": {
+
+            cfg["usuario"]: {
+
+                "name": cfg.get("nome", cfg["usuario"]),
+
+                "password": cfg["senha_hash"],
+
+            }
+
+        }
+
+    }
+
+    return stauth.Authenticate(
+
+        credentials,
+
+        cfg["cookie_name"],
+
+        cfg["cookie_key"],
+
+        cfg.get("cookie_expiry_days", 30),
+
+        auto_hash=False,
+
+    )
 
 
 # =============================================================================
@@ -746,7 +812,58 @@ def show_view(
 
 def main():
 
+    authenticator = build_authenticator()
+
+    if authenticator is None:
+
+        st.title("🌙 Planner Lunar Integrativo")
+
+        st.error("Login ainda não configurado.")
+
+        st.markdown(
+            "Crie `.streamlit/secrets.toml` a partir de "
+            "`.streamlit/secrets.toml.example` e gere sua senha com "
+            "`python scripts/gerar_hash_senha.py`. Veja o README."
+        )
+
+        return
+
+    authenticator.login(
+
+        location="main",
+
+        fields=LOGIN_FIELDS,
+
+    )
+
+    status = st.session_state.get("authentication_status")
+
+    if status is False:
+
+        st.error("Usuário ou senha incorretos.")
+
+        return
+
+    if status is None:
+
+        st.info("Digite seu usuário e senha para entrar.")
+
+        return
+
+    # --- autenticada a partir daqui ---
+
     selected_date, view = render_sidebar()
+
+    st.sidebar.divider()
+
+    st.sidebar.caption(
+        f"Logada como {st.session_state.get('name', '')}"
+    )
+
+    authenticator.logout(
+        "Sair",
+        location="sidebar",
+    )
 
     phase = get_phase(
 

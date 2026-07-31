@@ -158,6 +158,34 @@ http://localhost:8501
 
 ---
 
+# Login (primeiro acesso)
+
+O app pede **usuário e senha**. Configure na primeira vez:
+
+1. Copie o modelo de segredos:
+
+```bash
+copy .streamlit\secrets.toml.example .streamlit\secrets.toml
+```
+
+2. Gere o hash da sua senha (a senha é digitada de forma oculta e nunca é gravada):
+
+```bash
+python scripts/gerar_hash_senha.py
+```
+
+3. Abra `.streamlit/secrets.toml` e preencha `usuario`, `nome`, cole a linha `senha_hash`
+   que o passo 2 imprimiu, e troque `cookie_key` por uma frase longa e aleatória.
+
+O arquivo `.streamlit/secrets.toml` **nunca** é versionado (está no `.gitignore`) — sua senha
+fica só na sua máquina, em hash. O cookie mantém você logada por `cookie_expiry_days` dias; há
+um botão **Sair** na barra lateral.
+
+> **Streamlit Community Cloud:** em vez do arquivo, cole o mesmo conteúdo `[auth]` em
+> _App settings → Secrets_.
+
+---
+
 # Publicação no Streamlit Community Cloud
 
 O projeto é compatível com o Streamlit Community Cloud.

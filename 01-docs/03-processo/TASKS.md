@@ -24,6 +24,7 @@
   seguindo o doc, sem commitar senha em texto (RNF-004).
 - **REQs:** RNF-004
 - **Depende:** —
+- **Status:** ✅ done (2026-07-31)
 
 ### T-002 — Login gate no app (`app/app.py`)
 
@@ -35,6 +36,7 @@
 - **Aceite:** AC-AUTH-01 (sem login não mostra protocolo) e AC-AUTH-02 (F5 mantém logado).
 - **REQs:** RF-010, RF-011
 - **Depende:** T-001
+- **Status:** ✅ done (2026-07-31)
 
 ### T-003 — Botão de logout na sidebar (`app/app.py`)
 
@@ -44,3 +46,4 @@
 - **Aceite:** clicar em logout retorna à tela de login; um F5 posterior **não** re-loga automaticamente.
 - **REQs:** RF-011
 - **Depende:** T-002
+- **Status:** ✅ done (2026-07-31)
