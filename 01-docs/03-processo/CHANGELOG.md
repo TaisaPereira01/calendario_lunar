@@ -43,6 +43,10 @@ semântico quando o produto ganhar releases.
 - Testes automatizados: `tests/test_parse_cell.py` (13 casos) e `tests/test_login.py` (4 casos),
   pytest. Parsing de células extraído para `scripts/parsing.py` (puro, sem efeitos colaterais).
 
+### Alterado
+- **Ícone do período "Antes de Dormir"** trocado da luinha 🌙 para a pílula 💊 — é uma seção de
+  suplementos, como "Suplementos Manhã/Tarde". Ajuste visual em `PERIOD_ICONS` (`app/app.py`).
+
 ### Corrigido
 - **BUG-001:** "(Sempre com alguma gordura)" aparecia como item separado na lista de
   suplementos; agora é exibido como nota da "Vitamina D3" (linha entre parênteses no Excel
