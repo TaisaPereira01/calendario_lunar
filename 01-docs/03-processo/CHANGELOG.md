@@ -18,3 +18,9 @@ semântico quando o produto ganhar releases.
 - **BUG-001:** "(Sempre com alguma gordura)" aparecia como item separado na lista de
   suplementos; agora é exibido como nota da "Vitamina D3" (linha entre parênteses no Excel
   vira observação do item anterior). Banco reimportado (652 → 633 protocolos).
+- **BUG-002:** "Se tiver dor nas articulações" aparecia como item; agora é nota do "Ômega 3"
+  (condição "Se ..." no fim da célula vira observação do item anterior). Banco 633 → 627.
+
+### Adicionado
+- Primeiros testes automatizados do projeto: `tests/test_parse_cell.py` (13 casos, pytest).
+  Parsing de células extraído para `scripts/parsing.py` (puro, sem efeitos colaterais).

@@ -1,6 +1,6 @@
 # RULES — Planner Lunar Integrativo
 
-**Versão:** 0.2
+**Versão:** 0.3
 **Última atualização:** 2026-07-31
 **Framework:** Oya Agentic Framework v3.5+
 **Documento crítico** — alterações exigem atualização do bloco "Histórico do documento".
@@ -13,6 +13,7 @@
 |---|---|---|
 | 0.1 | 2026-07-31 | Rascunho inicial (adoção Oya, Etapa 1.5). Regras extraídas do código em funcionamento. |
 | 0.2 | 2026-07-31 | §6 ganhou a exceção de linha entre parênteses = nota do item anterior (BUG-001). |
+| 0.3 | 2026-07-31 | §6 ganhou a exceção de condição "Se ..." final = nota (BUG-002); parsing extraído para `scripts/parsing.py` com testes. |
 
 ---
 
@@ -53,7 +54,9 @@ para cálculos, mapeamentos e validações. Regras extraídas do sistema em func
 - Uma aba por fase: `Lua Nova`, `Lua Crescente`, `Lua Cheia`, `Lua Minguante`.
 - Colunas 3–9 = segunda…domingo; linhas 7–16 = os 10 períodos, cada um com seu tipo de item padrão.
 - Cada linha não vazia de uma célula vira um item; `•` e quebras de linha separam itens.
-- **Exceção (BUG-001):** uma linha **totalmente entre parênteses** — ex.: `(Sempre com alguma gordura)` — não é um item, e sim uma **nota** (qualificador) do item imediatamente anterior; seu texto interno vai para `notes`. Parêntese no meio do nome (ex.: `Vitamina D3 (2000 UI)`) não é afetado; parêntese sem item anterior permanece item.
+- **Exceção 1 (BUG-001):** uma linha **totalmente entre parênteses** — ex.: `(Sempre com alguma gordura)` — não é um item, e sim uma **nota** (qualificador) do item imediatamente anterior; seu texto interno vai para `notes`. Parêntese no meio do nome (ex.: `Vitamina D3 (2000 UI)`) não é afetado; parêntese sem item anterior permanece item.
+- **Exceção 2 (BUG-002):** uma **condição iniciada por "Se ..."** na **última** linha da célula (sem suplemento depois) — ex.: `Se tiver dor nas articulações` — também é nota do item anterior. "Se" no meio da célula, ou palavras como "Selênio"/"Sempre", não são afetados.
+- A lógica de parsing vive em `scripts/parsing.py` (puro, testável); `import_excel.py` a consome. Testes em `tests/test_parse_cell.py`.
 - A ordem de exibição (`display_order`) é atribuída por (fase × dia × período) na sequência de leitura.
 - Importação roda em transação única; itens repetidos são normalizados (um `item` reutilizado por vários `protocol_item`).
 

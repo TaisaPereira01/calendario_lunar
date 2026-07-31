@@ -42,3 +42,21 @@ _Nenhum defeito aberto._
 - **Resolução final:** adicionado `PAREN_NOTE = re.compile(r"^\((.+)\)$")`; `parse_cell` detecta a linha e anexa o texto interno como `notes` do item anterior (concatena se já houver nota). Banco regenerado via `import_excel.py` (652 → 633 protocolos; as 19 linhas viraram nota). O app já renderiza `notes` sob o item (`render_period_card`).
 - **Documentos atualizados:** `RULES.md` §6, `CHANGELOG.md`, este `BUGS.md`.
 - **Data de fechamento:** 2026-07-31
+
+### BUG-002 · "Se tiver dor nas articulações" aparecia como item em vez de nota do Ômega 3
+
+- **Sintoma:** em "Suplementos Tarde" (Lua Nova), "Se tiver dor nas articulações" aparecia como item próprio. É uma condição/observação do Ômega 3 logo acima (confirmado pela PM).
+- **Causa raiz:** `parse_cell` criava um item por linha; a condição "Se ..." na última linha da célula (sem suplemento depois) virava item.
+- **Tipo:** BUG
+- **Impacto:** 6 ocorrências (Lua Nova, 6 dias).
+- **Risco de regressão:** baixo — a regra (`COND_NOTE`, `^[Ss]e\s`) só se aplica quando a linha é a **última** (`is_last`); "Se" no meio da célula, ou itens como "Selênio"/"Sempre", não são afetados. Coberto por teste.
+- **Documentos impactados:** `RULES.md` §6, `CHANGELOG.md`. Código: `scripts/parsing.py` (novo), `scripts/import_excel.py`.
+- **Teste que deveria existir:** **criado** — `tests/test_parse_cell.py` (13 casos, cobre BUG-001 e BUG-002 + bordas).
+- **Severidade:** moderado
+
+#### Resolução
+
+- **Hipóteses testadas:** 1 — a condição "Se ..." final caía no caminho genérico "1 linha = 1 item".
+- **Resolução final:** o parsing puro foi **extraído** para `scripts/parsing.py` (sem efeitos colaterais → testável); `parse_cell` ganhou `COND_NOTE` (condição "Se ..." na última linha vira `notes` do item anterior). `import_excel.py` passou a importar de `parsing` e teve o `import re` órfão removido. Banco reimportado (633 → 627). A PM decidiu tratar como nota (não como suplemento faltante).
+- **Documentos atualizados:** `RULES.md` §6, `CHANGELOG.md`, este `BUGS.md`. Teste: `tests/test_parse_cell.py`.
+- **Data de fechamento:** 2026-07-31

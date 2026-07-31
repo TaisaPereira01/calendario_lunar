@@ -14,9 +14,10 @@ Streamlit
 
 from pathlib import Path
 import sqlite3
-import re
 
 from openpyxl import load_workbook
+
+from parsing import parse_cell
 
 
 # =============================================================================
@@ -147,43 +148,8 @@ def execute(sql, params=()):
 
 
 # =============================================================================
-# HELPERS
+# HELPERS — clean() / split_lines() extraídos para parsing.py (BUG-002)
 # =============================================================================
-
-def clean(value):
-
-    if value is None:
-
-        return ""
-
-    text = str(value)
-
-    text = text.replace("\r", "\n")
-
-    text = text.replace("•", "\n")
-
-    text = re.sub(r"\n+", "\n", text)
-
-    return text.strip()
-
-
-def split_lines(text):
-
-    text = clean(text)
-
-    if not text:
-
-        return []
-
-    return [
-
-        line.strip()
-
-        for line in text.split("\n")
-
-        if line.strip()
-
-    ]
 
 
 # =============================================================================
@@ -358,79 +324,8 @@ def get_or_create_item(
     return item_id
 
 # =============================================================================
-# CELL PARSER
+# CELL PARSER — parse_cell() extraído para parsing.py (BUG-001/BUG-002)
 # =============================================================================
-
-# Uma linha inteira entre parênteses é um qualificador do item anterior,
-# não um item próprio — ex.: "(Sempre com alguma gordura)" pertence à
-# Vitamina D3 que vem antes. Vira "notes" do item anterior. Ver BUG-001.
-
-PAREN_NOTE = re.compile(r"^\((.+)\)$")
-
-
-def parse_cell(value, item_type):
-    """
-    Converte uma célula em uma lista de itens.
-
-    Cada linha não vazia da célula gera um item.
-
-    Exceção: uma linha totalmente entre parênteses não é um item, e sim
-    uma nota (qualificador) do item imediatamente anterior. Ver BUG-001.
-
-    Exemplo:
-
-        Água morna
-        Limão
-        Respiração
-
-    →
-
-    [
-        {...},
-        {...},
-        {...}
-    ]
-    """
-
-    items = []
-
-    for line in split_lines(value):
-
-        note = PAREN_NOTE.match(line)
-
-        if note and items:
-
-            inner = note.group(1).strip()
-
-            previous = items[-1]
-
-            previous["notes"] = (
-
-                f'{previous["notes"]} {inner}'.strip()
-
-                if previous["notes"]
-
-                else inner
-
-            )
-
-            continue
-
-        items.append({
-
-            "type": item_type,
-
-            "name": line,
-
-            "value": "",
-
-            "description": "",
-
-            "notes": ""
-
-        })
-
-    return items
 
 
 # =============================================================================

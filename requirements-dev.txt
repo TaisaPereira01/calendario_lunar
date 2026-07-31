@@ -1,0 +1,7 @@
+# Dependências de desenvolvimento (testes).
+# App em produção usa apenas requirements.txt.
+#
+# Instalar:  pip install -r requirements-dev.txt
+# Rodar:     pytest tests/
+
+pytest>=8.0
