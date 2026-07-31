@@ -117,29 +117,9 @@ Extraídas de `RULES.md` — somam-se às regras canônicas do framework, não a
 * `/oya-bug-open`
 * `/oya-f1-run-all`
 * `/oya-f2-coding`
-* `/oya-f2-e2e`
-* `/oya-f2-e2e-browser`
 * `/oya-f2-implement`
 * `/oya-f2-review`
 * `/oya-f2-testing`
-* `/oya-f3-audit`
-* `/oya-f4-manual-test`
-* `/oya-framework-defect`
-* `/oya-framework-review`
-* `/oya-radar-projeto`
-* `/oya-review-status`
-* `/oya-rtm-bug-accept`
-* `/oya-rtm-bug-defer`
-* `/oya-rtm-bug-investigate`
-* `/oya-rtm-coverage`
-* `/oya-rtm-export`
-* `/oya-rtm-health`
-* `/oya-rtm-impact`
-* `/oya-rtm-impact-task`
-* `/oya-rtm-init`
-* `/oya-rtm-orphan-code`
-* `/oya-rtm-rebuild`
-* `/oya-rtm-recurrent`
 * `/oya-update-project`
 
 ---
