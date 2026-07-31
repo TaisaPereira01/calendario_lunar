@@ -59,13 +59,14 @@ def save_note(worksheet, data, texto) -> None:
     worksheet.append_row([key, texto])
 
 
-def open_worksheet(secrets):
-    """Abre (criando se preciso) a worksheet do diário a partir dos ``secrets``.
+def open_worksheet_named(secrets, worksheet_name, header):
+    """Abre (criando se preciso) uma worksheet nomeada na planilha ``[diario]``.
 
-    Único ponto de rede/credencial — isolado para o resto ser testável por mock.
-    Lê a seção ``[diario]`` (``spreadsheet_id``, ``worksheet``, ``service_account``).
-    Levanta :class:`DiarioError` se a config faltar, a lib não estiver instalada
-    ou o acesso ao Google falhar.
+    **Ponto único de rede/credencial**, compartilhado pelos recursos pessoais
+    (diário e checklist) — isolado para o resto ser testável por mock. Lê a seção
+    ``[diario]`` (``spreadsheet_id``, ``service_account``); se a aba ``worksheet_name``
+    não existir, cria com ``header``. Levanta :class:`DiarioError` se a config
+    faltar, a lib não estiver instalada, ou o acesso ao Google falhar.
     """
     try:
         cfg = secrets["diario"]
@@ -92,15 +93,31 @@ def open_worksheet(secrets):
     try:
         client = gspread.service_account_from_dict(service_account)
         spreadsheet = client.open_by_key(spreadsheet_id)
-        title = cfg.get("worksheet", DEFAULT_WORKSHEET)
         try:
-            return spreadsheet.worksheet(title)
+            return spreadsheet.worksheet(worksheet_name)
         except gspread.WorksheetNotFound:
-            worksheet = spreadsheet.add_worksheet(title=title, rows=1000, cols=2)
-            worksheet.append_row(HEADER)
+            worksheet = spreadsheet.add_worksheet(
+                title=worksheet_name, rows=1000, cols=len(header)
+            )
+            worksheet.append_row(header)
             return worksheet
     except Exception as exc:
-        raise DiarioError(f"Falha ao acessar o Google Sheets do diário: {exc}") from exc
+        raise DiarioError(f"Falha ao acessar o Google Sheets: {exc}") from exc
+
+
+def open_worksheet(secrets):
+    """Abre a worksheet do **diário** (aba ``[diario].worksheet``, default ``diario``).
+
+    Fina camada sobre :func:`open_worksheet_named` — o diário usa o cabeçalho
+    ``["data", "anotacao"]``.
+    """
+    try:
+        title = secrets["diario"].get("worksheet", DEFAULT_WORKSHEET)
+    except Exception:
+        # Config ausente/incompleta: usa o default e deixa o open_worksheet_named
+        # levantar o DiarioError com a mensagem certa.
+        title = DEFAULT_WORKSHEET
+    return open_worksheet_named(secrets, title, HEADER)
 
 
 # -----------------------------------------------------------------------------

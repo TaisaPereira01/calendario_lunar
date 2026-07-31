@@ -8,6 +8,11 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **Checklist — armazenamento** (T-009): `app/checklist.py` grava o estado "concluído" por data
+  no Google Sheets (aba `concluidos`, **mesma credencial do diário** — nada novo pra configurar),
+  com upsert por `(data, período, item)`. Acesso ao Sheets refatorado como ponto único compartilhado
+  (`diario.open_worksheet_named`). Isolado e testável por mock (`tests/test_checklist.py`). Não toca
+  o SQLite (INV-004). RF-016, AC-CHECK-02.
 - **View Fase Lunar** (T-008): nova aba **🌙 Fase Lunar** — escolha uma das 4 fases e veja o
   protocolo completo dela (os 7 dias), sem depender de uma data. Leitura pura sobre o banco;
   não muda invariante. RF-014, AC-PHASE-01.

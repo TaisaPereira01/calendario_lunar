@@ -140,7 +140,7 @@
   mensagem, não exceção.
 - **REQs:** RF-016
 - **Depende:** —
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)
 
 ### T-010 — Checklist inline na aba Hoje (`app/app.py`)
 
