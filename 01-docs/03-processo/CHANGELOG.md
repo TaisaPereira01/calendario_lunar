@@ -8,6 +8,9 @@ semântico quando o produto ganhar releases.
 ## [Não lançado]
 
 ### Adicionado
+- **View Fase Lunar** (T-008): nova aba **🌙 Fase Lunar** — escolha uma das 4 fases e veja o
+  protocolo completo dela (os 7 dias), sem depender de uma data. Leitura pura sobre o banco;
+  não muda invariante. RF-014, AC-PHASE-01.
 - **Diário — tela e uso** (T-006/T-007): nova aba **📓 Diário** no app — para a data
   escolhida, carrega a anotação, mostra um campo de texto e um botão salvar (upsert).
   Funciona em qualquer data (não depende da fase lunar) e fica atrás do login. **Isolamento

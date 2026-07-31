@@ -404,6 +404,19 @@ def get_protocol_week(
     ).fetchall()
 
 
+def get_phases():
+    """
+    Todas as fases ativas (para a view Fase Lunar — RF-014).
+    """
+
+    return db.execute(
+
+        "SELECT id, name, objective, nutrition, color "
+        "FROM phase WHERE active = 1 ORDER BY id"
+
+    ).fetchall()
+
+
 # =============================================================================
 # HELPERS
 # =============================================================================
@@ -683,25 +696,15 @@ def view_today(
 
 # =============================================================================
 
-def view_week(
-    phase,
-    selected_date,
-):
+def render_week_days(rows, expanded_weekday):
     """
-    Exibe todos os dias da semana.
+    Renderiza os 7 dias da semana em seções expansíveis, abrindo `expanded_weekday`.
+    Reutilizado pela view Semana e pela view Fase Lunar.
     """
-
-    rows = get_protocol_week(
-
-        phase["phase_id"]
-
-    )
 
     if not rows:
 
-        st.info(
-            "Nenhum protocolo encontrado."
-        )
+        st.info("Nenhum protocolo encontrado.")
 
         return
 
@@ -727,12 +730,6 @@ def view_week(
 
         days[row["weekday_id"]][1].append(row)
 
-    today = get_weekday_id(
-
-        selected_date
-
-    )
-
     for weekday in range(1, 8):
 
         title, day_rows = days[weekday]
@@ -741,7 +738,7 @@ def view_week(
 
             title,
 
-            expanded=(weekday == today),
+            expanded=(weekday == expanded_weekday),
 
         ):
 
@@ -750,19 +747,85 @@ def view_week(
 
 # =============================================================================
 
-def view_phase(
+def view_week(
     phase,
     selected_date,
 ):
     """
-    Placeholder da V2.2
+    Exibe todos os dias da semana.
     """
 
-    st.info(
+    rows = get_protocol_week(phase["phase_id"])
 
-        "Visualização por Fase Lunar será implementada na V2.2."
+    render_week_days(rows, get_weekday_id(selected_date))
 
+
+# =============================================================================
+
+def view_phase(selected_date):
+    """
+    View Fase Lunar (RF-014): escolher uma das 4 fases e ver o protocolo completo
+    dela (os 7 dias), sem depender de uma data. Leitura pura sobre o SQLite.
+    """
+
+    phases = get_phases()
+
+    if not phases:
+
+        st.info("Nenhuma fase cadastrada.")
+
+        return
+
+    names = [p["name"] for p in phases]
+
+    # Default: a fase da data selecionada, se houver; senão a primeira.
+    default_idx = 0
+
+    atual = get_phase(selected_date)
+
+    if atual is not None:
+
+        for i, p in enumerate(phases):
+
+            if p["name"] == atual["phase_name"]:
+
+                default_idx = i
+
+                break
+
+    escolhida_nome = st.selectbox(
+        "Escolha a fase",
+        names,
+        index=default_idx,
     )
+
+    escolhida = next(p for p in phases if p["name"] == escolhida_nome)
+
+    load_css(escolhida["color"])
+
+    st.title(f"🌙 {escolhida['name']}")
+
+    with st.container(border=True):
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.subheader("🎯 Objetivo")
+
+            st.write(escolhida["objective"] or "-")
+
+        with col2:
+
+            st.subheader("🥗 Nutrição")
+
+            st.write(escolhida["nutrition"] or "-")
+
+    st.write("")
+
+    rows = get_protocol_week(escolhida["id"])
+
+    render_week_days(rows, get_weekday_id(selected_date))
 
 
 # =============================================================================
@@ -858,18 +921,6 @@ def show_view(
 
         return
 
-    if view == VIEW_PHASE:
-
-        view_phase(
-
-            phase,
-
-            selected_date,
-
-        )
-
-        return
-
 
 # =============================================================================
 # MAIN
@@ -935,6 +986,15 @@ def main():
     if view == VIEW_DIARY:
 
         view_diario(selected_date)
+
+        render_footer()
+
+        return
+
+    # Fase Lunar também é independente da data (a fase é escolhida manualmente).
+    if view == VIEW_PHASE:
+
+        view_phase(selected_date)
 
         render_footer()
 

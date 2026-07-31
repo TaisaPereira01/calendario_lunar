@@ -125,7 +125,7 @@
 - **Aceite:** AC-PHASE-01 (escolher uma fase mostra o protocolo dela, 7 dias).
 - **REQs:** RF-014
 - **Depende:** —
-- **Status:** ⏳ pending
+- **Status:** ✅ done (2026-07-31)
 
 ### T-009 — Armazenamento do checklist (`app/checklist.py`)
 
